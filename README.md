@@ -1,11 +1,11 @@
-Here is the **complete single-file `README.md`** for **Bayyin v1.5.0**, fully formatted and ready to place in your project root or GitHub repository.
+Here is the **complete single-file `README.md`** for **Bayyin v2.4.0**, fully formatted and ready to place in your project root or GitHub repository.
 
 You can **copy everything below directly into `README.md`**.
 
 ---
 
 ````markdown
-# Bayyin v1.5.0
+# Bayyin v2.4.0
 
 Lightweight **PHP Native MVC Framework** designed for secure and rapid development of internal systems, dashboards, CRUD applications, and APIs.
 
@@ -16,6 +16,7 @@ Bayyin provides a **clean MVC structure, built-in security utilities, database m
 # Key Features
 
 ## Core Framework
+
 - PHP Native MVC architecture
 - Clean routing system
 - Modular controller structure
@@ -23,6 +24,7 @@ Bayyin provides a **clean MVC structure, built-in security utilities, database m
 - AdminLTE-ready UI integration
 
 ## Security
+
 - CSRF protection
 - Role-based middleware
 - Secure session management
@@ -32,6 +34,7 @@ Bayyin provides a **clean MVC structure, built-in security utilities, database m
 - Input filtering
 
 ## Database Layer
+
 - PDO database abstraction
 - Migration system
 - Seeder system
@@ -39,6 +42,7 @@ Bayyin provides a **clean MVC structure, built-in security utilities, database m
 - Safe query execution
 
 ## Developer Tools
+
 - CLI command tool (`bayyin.php`)
 - Code scaffolding generators
 - Migration generator
@@ -48,6 +52,7 @@ Bayyin provides a **clean MVC structure, built-in security utilities, database m
 - Configuration inspector
 
 ## API Support
+
 - REST API routing
 - API response helpers
 - JSON request support
@@ -72,7 +77,8 @@ Bayyin provides a **clean MVC structure, built-in security utilities, database m
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourrepo/bayyin-framework.git
+git clone https://github.com/fauzibspp/bayyin.git
+```
 ````
 
 Or download the ZIP file and extract it.
@@ -97,7 +103,7 @@ APP_URL=http://localhost
 
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_NAME=prismariskdb
+DB_NAME=sampledb
 DB_USER=root
 DB_PASS=
 
@@ -111,7 +117,7 @@ SESSION_NAME=secureapp_session
 Create database in MySQL:
 
 ```
-prismariskdb
+sampledb
 ```
 
 Or use the database name defined in `.env`.
@@ -250,14 +256,15 @@ php cli/bayyin.php make:module Product products
 ```
 
 ### Generate full module (Web + API)
+
 php cli/bayyin.php make:full-module Product products "name:string,price:decimal,stock:int,is_active:boolean,description:text"
 
 This automatically creates:
 
-* Controller
-* Model
-* Views folder
-* Basic CRUD structure
+- Controller
+- Model
+- Views folder
+- Basic CRUD structure
 
 ---
 
@@ -349,14 +356,14 @@ BayyinFramework/
 
 Bayyin is suitable for:
 
-* Admin dashboards
-* CRUD systems
-* School management systems
-* HR systems
-* Internal business systems
-* REST API backends
-* Reporting dashboards
-* Small SaaS platforms
+- Admin dashboards
+- CRUD systems
+- School management systems
+- HR systems
+- Internal business systems
+- REST API backends
+- Reporting dashboards
+- Small SaaS platforms
 
 ---
 
@@ -366,12 +373,12 @@ Bayyin is suitable for:
 
 Planned improvements:
 
-* CRUD generator (`make:crud`)
-* Automatic route registration
-* Form builder
-* Validation request classes
-* Module auto-registration
-* Improved API scaffolding
+- CRUD generator (`make:crud`)
+- Automatic route registration
+- Form builder
+- Validation request classes
+- Module auto-registration
+- Improved API scaffolding
 
 ---
 
@@ -394,3 +401,4 @@ Email:
 
 ```
 
+```
