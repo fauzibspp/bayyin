@@ -369,16 +369,16 @@ Bayyin is suitable for:
 
 # Roadmap
 
-## v1.6 (Next Release)
+## v2.5 (Next Release)
 
 Planned improvements:
 
-- CRUD generator (`make:crud`)
-- Automatic route registration
-- Form builder
-- Validation request classes
-- Module auto-registration
-- Improved API scaffolding
+- generated AJAX create flow
+- generated AJAX update flow
+- generated AJAX delete flow refinement
+- generated modal create/edit form2
+- inline validation response format for API
+- richer generated admin UX
 
 ---
 
