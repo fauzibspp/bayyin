@@ -392,7 +392,7 @@ MIT License
 
 Developed and maintained by
 
-**Mohd Fauzi Mohamad Akhir**
+**fauzi**
 
 Freelance Software Developer
 
