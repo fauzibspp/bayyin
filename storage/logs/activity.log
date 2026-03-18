@@ -1,0 +1,21 @@
+[2026-03-11 06:52:43] [INFO] [test@example.com] New user registered
+[2026-03-11 06:54:01] [INFO] [test@example.com] Successful login
+[2026-03-11 06:55:41] [WARNING] [test@example.com] Failed login attempt
+[2026-03-11 06:55:47] [WARNING] [admin@moe.gov.my] Failed login attempt
+[2026-03-11 06:55:55] [WARNING] [test@example.com] Failed login attempt
+[2026-03-11 06:56:06] [INFO] [test@example.com] Successful login
+[2026-03-11 06:56:53] [WARNING] [admin@moe.gov.my] Failed login attempt
+[2026-03-11 06:58:34] [INFO] [test@example.com] Successful login
+[2026-03-11 07:10:15] [WARNING] [admin@moe.gov.my] Failed login attempt
+[2026-03-11 07:12:17] [INFO] [admin@moe.gov.my] New user registered
+[2026-03-11 07:28:44] [INFO] [john@example.com] New user registered
+[2026-03-11 07:29:08] [WARNING] [john@example.com] Failed login attempt
+[2026-03-11 07:29:18] [INFO] [john@example.com] Successful login
+[2026-03-11 07:41:05] [WARNING] [admin@moe.gov.my] Failed login attempt
+[2026-03-11 10:14:45] [WARNING] [admin@moe.gov.my] Failed login attempt
+[2026-03-11 10:15:00] [WARNING] [admin@example.com] Failed login attempt
+[2026-03-11 10:15:14] [WARNING] [admin@example.com] Failed login attempt
+[2026-03-12 02:07:13] [INFO] [test@example.com] Successful login
+[2026-03-12 02:18:52] [INFO] [omar@example.com] Successful login
+[2026-03-12 04:10:15] [WARNING] [admin@example.com] Failed login attempt
+[2026-03-12 04:12:00] [INFO] [admin@example.com] Successful login

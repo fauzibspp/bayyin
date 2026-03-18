@@ -1,0 +1,74 @@
+[2026-03-11 06:31:20] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'prismariskdb.users' doesn't exist
+#0 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\Database.php(54): PDO->prepare('SELECT * FROM u...')
+#1 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\Database.php(62): App\Core\Database->query('SELECT * FROM u...', Array)
+#2 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Models\UserModel.php(23): App\Core\Database->fetch('SELECT * FROM u...', Array)
+#3 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Models\UserModel.php(51): App\Models\UserModel->findByEmail('admin@moe.gov.m...')
+#4 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\AuthController.php(54): App\Models\UserModel->login('admin@moe.gov.m...', 'P@ssw0rd')
+#5 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\App.php(28): App\Controllers\AuthController->login()
+#6 D:\PROJECT_FRAMEWORK\SecureAppFramework\public\index.php(13): App\Core\App->run()
+#7 {main}
+
+[2026-03-11 06:49:26] SQLSTATE[42S02]: Base table or view not found: 1146 Table 'prismariskdb.users' doesn't exist
+#0 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\Database.php(54): PDO->prepare('SELECT * FROM u...')
+#1 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\Database.php(62): App\Core\Database->query('SELECT * FROM u...', Array)
+#2 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Models\UserModel.php(23): App\Core\Database->fetch('SELECT * FROM u...', Array)
+#3 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Models\UserModel.php(51): App\Models\UserModel->findByEmail('admin@moe.gov.m...')
+#4 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\AuthController.php(54): App\Models\UserModel->login('admin@moe.gov.m...', 'P@ssw0rd')
+#5 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\App.php(28): App\Controllers\AuthController->login()
+#6 D:\PROJECT_FRAMEWORK\SecureAppFramework\public\index.php(13): App\Core\App->run()
+#7 {main}
+
+[2026-03-12 02:47:03] Class "App\Controllers\ApiAuth" not found
+#0 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\App.php(28): App\Controllers\UserApiController->index()
+#1 D:\PROJECT_FRAMEWORK\SecureAppFramework\public\index.php(14): App\Core\App->run()
+#2 {main}
+
+[2026-03-12 02:55:21] Call to undefined method App\Core\Version::get()
+#0 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\View.php(32): require()
+#1 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\BaseController.php(12): App\Core\View::render('dashboard/admin', Array, 'layouts/master')
+#2 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\DashboardController.php(12): App\Controllers\BaseController->view('dashboard/admin')
+#3 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\App.php(28): App\Controllers\DashboardController->index()
+#4 D:\PROJECT_FRAMEWORK\SecureAppFramework\public\index.php(14): App\Core\App->run()
+#5 {main}
+
+[2026-03-12 02:55:25] Call to undefined method App\Core\Version::get()
+#0 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\View.php(32): require()
+#1 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\BaseController.php(12): App\Core\View::render('dashboard/admin', Array, 'layouts/master')
+#2 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\DashboardController.php(12): App\Controllers\BaseController->view('dashboard/admin')
+#3 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\App.php(28): App\Controllers\DashboardController->index()
+#4 D:\PROJECT_FRAMEWORK\SecureAppFramework\public\index.php(14): App\Core\App->run()
+#5 {main}
+
+[2026-03-12 02:55:26] Call to undefined method App\Core\Version::get()
+#0 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\View.php(32): require()
+#1 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\BaseController.php(12): App\Core\View::render('users/index', Array, 'layouts/master')
+#2 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\UserController.php(47): App\Controllers\BaseController->view('users/index', Array)
+#3 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\App.php(28): App\Controllers\UserController->index()
+#4 D:\PROJECT_FRAMEWORK\SecureAppFramework\public\index.php(14): App\Core\App->run()
+#5 {main}
+
+[2026-03-12 02:55:28] Call to undefined method App\Core\Version::get()
+#0 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\View.php(32): require()
+#1 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\BaseController.php(12): App\Core\View::render('dashboard/admin', Array, 'layouts/master')
+#2 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\DashboardController.php(12): App\Controllers\BaseController->view('dashboard/admin')
+#3 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\App.php(28): App\Controllers\DashboardController->index()
+#4 D:\PROJECT_FRAMEWORK\SecureAppFramework\public\index.php(14): App\Core\App->run()
+#5 {main}
+
+[2026-03-12 02:55:29] Call to undefined method App\Core\Version::get()
+#0 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\View.php(32): require()
+#1 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\BaseController.php(12): App\Core\View::render('users/index', Array, 'layouts/master')
+#2 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\UserController.php(47): App\Controllers\BaseController->view('users/index', Array)
+#3 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\App.php(28): App\Controllers\UserController->index()
+#4 D:\PROJECT_FRAMEWORK\SecureAppFramework\public\index.php(14): App\Core\App->run()
+#5 {main}
+
+[2026-03-12 04:39:01] Class "Version" not found
+#0 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Views\layouts\master.php(35): require()
+#1 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\View.php(32): require('D:\\PROJECT_FRAM...')
+#2 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\BaseController.php(12): App\Core\View::render('dashboard/admin', Array, 'layouts/master')
+#3 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Controllers\DashboardController.php(12): App\Controllers\BaseController->view('dashboard/admin')
+#4 D:\PROJECT_FRAMEWORK\SecureAppFramework\app\Core\App.php(28): App\Controllers\DashboardController->index()
+#5 D:\PROJECT_FRAMEWORK\SecureAppFramework\public\index.php(14): App\Core\App->run()
+#6 {main}
+

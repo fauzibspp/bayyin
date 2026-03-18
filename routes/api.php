@@ -1,0 +1,37 @@
+<?php
+
+return [
+    'GET' => [
+        '/api/users' => ['UserApiController', 'index'],
+        '/api/users-datatable' => ['UserDataTableController', 'index'],
+        '/api/products' => ['ProductApiController', 'index'],
+        '/api/categories' => ['CategoryApiController', 'index'],
+        '/api/products/show' => ['ProductApiController', 'show'],
+        '/api/orders' => ['OrderApiController', 'index'],
+        '/api/orders/show' => ['OrderApiController', 'show'],
+        '/api/invoices' => ['InvoiceApiController', 'index'],
+        '/api/invoices/datatable' => ['InvoiceApiController', 'datatable'],
+        '/api/invoices/show' => ['InvoiceApiController', 'show'],
+        '/api/payments' => ['PaymentApiController', 'index'],
+        '/api/payments/datatable' => ['PaymentApiController', 'datatable'],
+        '/api/payments/show' => ['PaymentApiController', 'show'],
+    ],
+    'POST' => [
+        '/api/products/store' => ['ProductApiController', 'store'],
+        '/api/products/update' => ['ProductApiController', 'update'],
+        '/api/products/delete' => ['ProductApiController', 'delete'],
+        '/api/categories/store' => ['CategoryApiController', 'store'],
+        '/api/categories/update' => ['CategoryApiController', 'update'],
+        '/api/categories/delete' => ['CategoryApiController', 'delete'],
+        '/api/orders/store' => ['OrderApiController', 'store'],
+        '/api/orders/update' => ['OrderApiController', 'update'],
+        '/api/orders/delete' => ['OrderApiController', 'delete'],
+        '/api/invoices/store' => ['InvoiceApiController', 'store'],
+        '/api/invoices/update' => ['InvoiceApiController', 'update'],
+        '/api/invoices/delete' => ['InvoiceApiController', 'delete'],
+        '/api/payments/store' => ['PaymentApiController', 'store'],
+        '/api/payments/update' => ['PaymentApiController', 'update'],
+        '/api/payments/delete' => ['PaymentApiController', 'delete'],
+        '/api/payments/bulk-delete' => ['PaymentApiController', 'bulkDelete'],
+    ],
+];
