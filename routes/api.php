@@ -15,6 +15,9 @@ return [
         '/api/payments' => ['PaymentApiController', 'index'],
         '/api/payments/datatable' => ['PaymentApiController', 'datatable'],
         '/api/payments/show' => ['PaymentApiController', 'show'],
+        '/api/customers' => ['CustomerApiController', 'index'],
+        '/api/customers/datatable' => ['CustomerApiController', 'datatable'],
+        '/api/customers/show' => ['CustomerApiController', 'show'],
     ],
     'POST' => [
         '/api/products/store' => ['ProductApiController', 'store'],
@@ -33,5 +36,9 @@ return [
         '/api/payments/update' => ['PaymentApiController', 'update'],
         '/api/payments/delete' => ['PaymentApiController', 'delete'],
         '/api/payments/bulk-delete' => ['PaymentApiController', 'bulkDelete'],
+        '/api/customers/store' => ['CustomerApiController', 'store'],
+        '/api/customers/update' => ['CustomerApiController', 'update'],
+        '/api/customers/delete' => ['CustomerApiController', 'delete'],
+        '/api/customers/bulk-delete' => ['CustomerApiController', 'bulkDelete'],
     ],
 ];

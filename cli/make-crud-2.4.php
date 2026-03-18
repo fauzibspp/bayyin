@@ -1,5 +1,6 @@
 <?php
 
+// require_once dirname(__DIR__) . '/app/Core/Autoloader.php';
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Core\Console;
@@ -312,7 +313,6 @@ PHP;
 
 $columnHeaders = '';
 $columnsJs = '';
-
 foreach ($fields as $field) {
     if ($field['name'] === 'deleted_at') {
         continue;
@@ -328,7 +328,6 @@ $showFields = '';
 
 foreach ($fields as $field) {
     $name = $field['name'];
-
     if ($name === 'deleted_at') {
         continue;
     }
@@ -425,9 +424,9 @@ $indexView = <<<PHP
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0"><?= htmlspecialchars(\$moduleTitle) ?> Listing</h1>
     <div>
-        <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#modal-create-{$viewFolder}">
+        <a href="/<?= htmlspecialchars(\$viewPath) ?>/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add New
-        </button>
+        </a>
         <button type="button" id="btn-bulk-delete-{$viewFolder}" class="btn btn-danger">
             Bulk Delete
         </button>
@@ -459,128 +458,6 @@ $indexView = <<<PHP
     </div>
 </div>
 
-<div class="modal fade" id="modal-create-{$viewFolder}" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <form id="form-create-{$viewFolder}">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create <?= htmlspecialchars(\$moduleTitle) ?></h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                </div>
-                <div class="modal-body">
-                    <div id="create-errors-{$viewFolder}" class="alert alert-danger d-none"></div>
-PHP;
-
-$modalCreateFields = '';
-$modalEditFields = '';
-
-foreach ($fields as $field) {
-    $name = $field['name'];
-
-    if ($name === 'deleted_at') {
-        continue;
-    }
-
-    $label = ucwords(str_replace('_', ' ', $name));
-    $type = $field['type'];
-
-    if (SchemaParser::isTextarea($type)) {
-        $modalCreateFields .= <<<PHP
-
-                    <div class="form-group">
-                        <label for="create_{$name}">{$label}</label>
-                        <textarea name="{$name}" id="create_{$name}" class="form-control" rows="4" required></textarea>
-                    </div>
-PHP;
-
-        $modalEditFields .= <<<PHP
-
-                    <div class="form-group">
-                        <label for="edit_{$name}">{$label}</label>
-                        <textarea name="{$name}" id="edit_{$name}" class="form-control" rows="4" required></textarea>
-                    </div>
-PHP;
-    } elseif (SchemaParser::isCheckbox($type)) {
-        $modalCreateFields .= <<<PHP
-
-                    <div class="form-group form-check">
-                        <input type="hidden" name="{$name}" value="0">
-                        <input type="checkbox" name="{$name}" id="create_{$name}" value="1" class="form-check-input">
-                        <label class="form-check-label" for="create_{$name}">{$label}</label>
-                    </div>
-PHP;
-
-        $modalEditFields .= <<<PHP
-
-                    <div class="form-group form-check">
-                        <input type="hidden" name="{$name}" value="0">
-                        <input type="checkbox" name="{$name}" id="edit_{$name}" value="1" class="form-check-input">
-                        <label class="form-check-label" for="edit_{$name}">{$label}</label>
-                    </div>
-PHP;
-    } else {
-        $inputType = SchemaParser::inputType($type);
-        $step = $type === 'decimal' ? ' step="0.01"' : '';
-
-        $modalCreateFields .= <<<PHP
-
-                    <div class="form-group">
-                        <label for="create_{$name}">{$label}</label>
-                        <input type="{$inputType}" name="{$name}" id="create_{$name}" class="form-control"{$step} required>
-                    </div>
-PHP;
-
-        $modalEditFields .= <<<PHP
-
-                    <div class="form-group">
-                        <label for="edit_{$name}">{$label}</label>
-                        <input type="{$inputType}" name="{$name}" id="edit_{$name}" class="form-control"{$step} required>
-                    </div>
-PHP;
-    }
-}
-
-$indexView .= $modalCreateFields;
-
-$indexView .= <<<PHP
-
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Save</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div class="modal fade" id="modal-edit-{$viewFolder}" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <form id="form-edit-{$viewFolder}">
-            <input type="hidden" name="id" id="edit_id_{$viewFolder}">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit <?= htmlspecialchars(\$moduleTitle) ?></h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                </div>
-                <div class="modal-body">
-                    <div id="edit-errors-{$viewFolder}" class="alert alert-danger d-none"></div>
-PHP;
-
-$indexView .= $modalEditFields;
-
-$indexView .= <<<PHP
-
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Update</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
 <script>
 $(function () {
     const table = $('#datatable-{$viewFolder}').DataTable({
@@ -604,115 +481,11 @@ $(function () {
                 render: function (data, type, row) {
                     return ''
                         + '<a href="/{$viewFolder}/show?id=' + row.id + '" class="btn btn-info btn-sm mr-1">View</a>'
-                        + '<button type="button" class="btn btn-warning btn-sm mr-1 btn-edit" data-row=\'' + JSON.stringify(row) + '\'>Edit</button>'
+                        + '<a href="/{$viewFolder}/edit?id=' + row.id + '" class="btn btn-warning btn-sm mr-1">Edit</a>'
                         + '<button type="button" class="btn btn-danger btn-sm btn-delete" data-id="' + row.id + '">Delete</button>';
                 }
             }
         ]
-    });
-
-    function showErrors(container, errors) {
-        let html = '<ul class="mb-0">';
-        $.each(errors || {}, function (field, messages) {
-            $.each(messages, function (_, message) {
-                html += '<li>' + message + '</li>';
-            });
-        });
-        html += '</ul>';
-        $(container).removeClass('d-none').html(html);
-    }
-
-    function clearErrors(container) {
-        $(container).addClass('d-none').html('');
-    }
-
-    $('#form-create-{$viewFolder}').on('submit', function (e) {
-        e.preventDefault();
-        clearErrors('#create-errors-{$viewFolder}');
-
-        const data = {};
-        $(this).serializeArray().forEach(function (item) {
-            data[item.name] = item.value;
-        });
-
-        $.ajax({
-            url: '/api/{$viewFolder}/store',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: function () {
-                $('#modal-create-{$viewFolder}').modal('hide');
-                $('#form-create-{$viewFolder}')[0].reset();
-                table.ajax.reload(null, false);
-                alert('Record created successfully.');
-            },
-            error: function (xhr) {
-                const response = xhr.responseJSON || {};
-                showErrors('#create-errors-{$viewFolder}', response.errors || { general: ['Failed to create record.'] });
-            }
-        });
-    });
-
-    $(document).on('click', '.btn-edit', function () {
-        const row = $(this).data('row');
-        clearErrors('#edit-errors-{$viewFolder}');
-        $('#edit_id_{$viewFolder}').val(row.id);
-PHP;
-
-foreach ($fields as $field) {
-    $name = $field['name'];
-    if ($name === 'deleted_at') {
-        continue;
-    }
-    if (SchemaParser::isCheckbox($field['type'])) {
-        $indexView .= "\n        $('#edit_{$name}').prop('checked', !!parseInt(row.{$name} || 0, 10));";
-    } else {
-        $indexView .= "\n        $('#edit_{$name}').val(row.{$name} || '');";
-    }
-}
-
-$indexView .= <<<PHP
-
-        $('#modal-edit-{$viewFolder}').modal('show');
-    });
-
-    $('#form-edit-{$viewFolder}').on('submit', function (e) {
-        e.preventDefault();
-        clearErrors('#edit-errors-{$viewFolder}');
-
-        const data = {};
-        $(this).serializeArray().forEach(function (item) {
-            data[item.name] = item.value;
-        });
-PHP;
-
-foreach ($fields as $field) {
-    $name = $field['name'];
-    if ($name === 'deleted_at') {
-        continue;
-    }
-    if (SchemaParser::isCheckbox($field['type'])) {
-        $indexView .= "\n        data['{$name}'] = $('#edit_{$name}').is(':checked') ? 1 : 0;";
-    }
-}
-
-$indexView .= <<<PHP
-
-        $.ajax({
-            url: '/api/{$viewFolder}/update',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: function () {
-                $('#modal-edit-{$viewFolder}').modal('hide');
-                table.ajax.reload(null, false);
-                alert('Record updated successfully.');
-            },
-            error: function (xhr) {
-                const response = xhr.responseJSON || {};
-                showErrors('#edit-errors-{$viewFolder}', response.errors || { general: ['Failed to update record.'] });
-            }
-        });
     });
 
     $('#check-all-{$viewFolder}').on('change', function () {
@@ -773,21 +546,80 @@ $indexView .= <<<PHP
 </script>
 PHP;
 
-$showFields = '';
-foreach ($fields as $field) {
-    $name = $field['name'];
-    if ($name === 'deleted_at') {
-        continue;
-    }
-    $label = ucwords(str_replace('_', ' ', $name));
-    $showFields .= <<<PHP
+$createView = <<<PHP
+<?php
+use App\Core\CSRF;
 
-        <tr>
-            <th width="220">{$label}</th>
-            <td><?= htmlspecialchars((string) (\$data['{$name}'] ?? '')) ?></td>
-        </tr>
+\$moduleTitle = '{$module}';
+\$viewPath = '{$viewFolder}';
+\$old = \$old ?? [];
+\$validationErrors = \$validationErrors ?? [];
+?>
+
+<div class="mb-3">
+    <h1 class="mb-0">Create <?= htmlspecialchars(\$moduleTitle) ?></h1>
+</div>
+
+<?php if (!empty(\$error)): ?>
+    <div class="alert alert-danger"><?= htmlspecialchars(\$error) ?></div>
+<?php endif; ?>
+
+{$validationBlock}
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="/<?= htmlspecialchars(\$viewPath) ?>/create">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars(CSRF::generate()) ?>">
+{$createFields}
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <a href="/<?= htmlspecialchars(\$viewPath) ?>" class="btn btn-secondary">Back</a>
+            </div>
+        </form>
+    </div>
+</div>
 PHP;
-}
+
+$editView = <<<PHP
+<?php
+use App\Core\CSRF;
+
+\$moduleTitle = '{$module}';
+\$viewPath = '{$viewFolder}';
+\$data = \$data ?? ['id' => ''];
+\$validationErrors = \$validationErrors ?? [];
+?>
+
+<div class="mb-3">
+    <h1 class="mb-0">Edit <?= htmlspecialchars(\$moduleTitle) ?></h1>
+</div>
+
+<?php if (!empty(\$error)): ?>
+    <div class="alert alert-danger"><?= htmlspecialchars(\$error) ?></div>
+<?php endif; ?>
+
+{$validationBlock}
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="/<?= htmlspecialchars(\$viewPath) ?>/edit">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars(CSRF::generate()) ?>">
+            <input type="hidden" name="id" value="<?= htmlspecialchars((string) (\$data['id'] ?? '')) ?>">
+{$editFields}
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update
+                </button>
+                <a href="/<?= htmlspecialchars(\$viewPath) ?>" class="btn btn-secondary">Back</a>
+            </div>
+        </form>
+    </div>
+</div>
+PHP;
 
 $showView = <<<PHP
 <?php
@@ -799,6 +631,7 @@ $showView = <<<PHP
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0">View <?= htmlspecialchars(\$moduleTitle) ?></h1>
     <div>
+        <a href="/<?= htmlspecialchars(\$viewPath) ?>/edit?id=<?= htmlspecialchars((string) (\$data['id'] ?? '')) ?>" class="btn btn-warning">Edit</a>
         <a href="/<?= htmlspecialchars(\$viewPath) ?>" class="btn btn-secondary">Back</a>
     </div>
 </div>
@@ -811,18 +644,6 @@ $showView = <<<PHP
         </table>
     </div>
 </div>
-PHP;
-
-$createView = <<<PHP
-<?php
-header('Location: /{$viewFolder}');
-exit;
-PHP;
-
-$editView = <<<PHP
-<?php
-header('Location: /{$viewFolder}');
-exit;
 PHP;
 
 $views = [
@@ -845,7 +666,7 @@ $migrationFile = $migrationsDir . '/' . $timestamp . '_' . $migrationName . '.ph
 $migrationColumns = [];
 foreach ($fields as $field) {
     $columnType = SchemaParser::migrationType($field['type']);
-    $migrationColumns[] = "                {$field['name']} {$columnType} NULL";
+    $migrationColumns[] = "                {$field['name']} {$columnType} NOT NULL";
 }
 $columnsBlock = implode(",\n", $migrationColumns);
 
@@ -894,5 +715,5 @@ Console::line("- Seeder: {$seederName}.php");
 Console::line("- Views: {$viewFolder}/");
 Console::line("- Migration: " . basename($migrationFile));
 Console::line("- Routes auto registered: /{$viewFolder}, /create, /edit, /delete, /show");
-Console::line("- Features: modal forms, AJAX create/update/delete, bulk delete, DataTables-ready index" . ($hasDeletedAt ? ', soft delete ready' : ''));
+Console::line("- Features: DataTables-ready index, AJAX delete, bulk delete, flash/validation placeholders" . ($hasDeletedAt ? ', soft delete ready' : ''));
 Console::line("- Fields: " . implode(', ', array_map(fn($f) => $f['name'] . ':' . $f['type'], $fields)));

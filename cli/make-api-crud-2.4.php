@@ -1,5 +1,6 @@
 <?php
 
+// require_once dirname(__DIR__) . '/app/Core/Autoloader.php';
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Core\Console;
@@ -157,7 +158,7 @@ class {$controllerName} extends ApiController
         \$id = (int) (\$_GET['id'] ?? 0);
 
         if (\$id <= 0) {
-            \$this->error('id is required.', 422, ['id' => ['Id is required.']]);
+            \$this->error('id is required.', 422);
         }
 
         \$item = \$this->model->find(\$id);
@@ -208,7 +209,7 @@ class {$controllerName} extends ApiController
         \$input = JsonRequest::all();
 
         if (empty(\$input['id'])) {
-            \$this->error('Validation failed.', 422, ['id' => ['Id is required.']]);
+            \$this->error('id is required.', 422);
         }
 
         {$deleteLogic}
@@ -222,7 +223,7 @@ class {$controllerName} extends ApiController
         \$ids = \$input['ids'] ?? [];
 
         if (!is_array(\$ids) || empty(\$ids)) {
-            \$this->error('Validation failed.', 422, ['ids' => ['Ids array is required.']]);
+            \$this->error('ids array is required.', 422);
         }
 
         foreach (\$ids as \$id) {
@@ -256,5 +257,5 @@ Console::line("  POST /api/{$table}/store");
 Console::line("  POST /api/{$table}/update");
 Console::line("  POST /api/{$table}/delete");
 Console::line("  POST /api/{$table}/bulk-delete");
-Console::line("- Features: show, datatable, pagination, search/filter, bulk delete, ajax-friendly validation" . ($hasDeletedAt ? ', soft delete ready' : ''));
+Console::line("- Features: show, datatable, pagination, search/filter, bulk delete, validation helper" . ($hasDeletedAt ? ', soft delete ready' : ''));
 Console::line("- Fields: " . implode(', ', array_map(fn($f) => $f['name'] . ':' . $f['type'], $fields)));

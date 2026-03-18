@@ -32,6 +32,11 @@ return [
         '/payments/edit' => ['PaymentController', 'edit'],
         '/payments/delete' => ['PaymentController', 'delete'],
         '/payments/show' => ['PaymentController', 'show'],
+        '/customers' => ['CustomerController', 'index'],
+        '/customers/create' => ['CustomerController', 'create'],
+        '/customers/edit' => ['CustomerController', 'edit'],
+        '/customers/delete' => ['CustomerController', 'delete'],
+        '/customers/show' => ['CustomerController', 'show'],
     ],
     'POST' => [
         '/login' => ['AuthController', 'login'],

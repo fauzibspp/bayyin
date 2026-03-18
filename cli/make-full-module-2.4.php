@@ -1,5 +1,6 @@
 <?php
 
+// require_once dirname(__DIR__) . '/app/Core/Autoloader.php';
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Core\Console;
@@ -36,9 +37,10 @@ require dirname(__DIR__) . '/cli/make-api-crud.php';
 Console::success("Full module generated successfully for {$module}");
 Console::line('Included:');
 Console::line('- Web CRUD scaffold');
-Console::line('- Web modal create/edit forms');
-Console::line('- Web AJAX create/update/delete');
+Console::line('- Web show page');
+Console::line('- Web create/edit/delete methods');
 Console::line('- Web DataTables-ready listing');
+Console::line('- Web AJAX delete flow');
 Console::line('- Web bulk delete flow');
 Console::line('- API CRUD scaffold');
 Console::line('- API show endpoint');
@@ -52,6 +54,6 @@ Console::line('- Seeder');
 Console::line('- Request class');
 Console::line('- Web route registration');
 Console::line('- API route registration');
-Console::line('- Better AJAX-ready admin structure');
+Console::line('- Better validation-ready structure');
 
 exit;
