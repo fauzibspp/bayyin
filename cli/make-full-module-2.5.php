@@ -41,7 +41,6 @@ Console::line('- Web AJAX create/update/delete');
 Console::line('- Web DataTables-ready listing');
 Console::line('- Web bulk delete flow');
 Console::line('- API CRUD scaffold');
-Console::line('- API JWT protection');
 Console::line('- API show endpoint');
 Console::line('- API datatable endpoint');
 Console::line('- API pagination');

@@ -72,7 +72,6 @@ namespace App\Controllers\Api;
 
 use App\Controllers\ApiController;
 use App\Core\JsonRequest;
-use App\Middleware\JwtAuth;
 use App\Models\\{$modelName};
 
 class {$controllerName} extends ApiController
@@ -99,8 +98,6 @@ class {$controllerName} extends ApiController
 
     public function index(): void
     {
-        JwtAuth::handle();
-
         \$page = max(1, (int) (\$_GET['page'] ?? 1));
         \$perPage = max(1, min(100, (int) (\$_GET['per_page'] ?? 10)));
         \$search = trim((string) (\$_GET['search'] ?? ''));
@@ -128,8 +125,6 @@ class {$controllerName} extends ApiController
 
     public function datatable(): void
     {
-        JwtAuth::handle();
-
         \$draw = (int) (\$_GET['draw'] ?? 1);
         \$start = max(0, (int) (\$_GET['start'] ?? 0));
         \$length = max(1, min(100, (int) (\$_GET['length'] ?? 10)));
@@ -159,8 +154,6 @@ class {$controllerName} extends ApiController
 
     public function show(): void
     {
-        JwtAuth::handle();
-
         \$id = (int) (\$_GET['id'] ?? 0);
 
         if (\$id <= 0) {
@@ -178,8 +171,6 @@ class {$controllerName} extends ApiController
 
     public function store(): void
     {
-        JwtAuth::role('admin');
-
         \$input = JsonRequest::all();
         \$errors = \$this->validateInput(\$input);
 
@@ -197,8 +188,6 @@ class {$controllerName} extends ApiController
 
     public function update(): void
     {
-        JwtAuth::role('admin');
-
         \$input = JsonRequest::all();
         \$errors = \$this->validateInput(\$input, true);
 
@@ -216,8 +205,6 @@ class {$controllerName} extends ApiController
 
     public function delete(): void
     {
-        JwtAuth::role('admin');
-
         \$input = JsonRequest::all();
 
         if (empty(\$input['id'])) {
@@ -231,8 +218,6 @@ class {$controllerName} extends ApiController
 
     public function bulkDelete(): void
     {
-        JwtAuth::role('admin');
-
         \$input = JsonRequest::all();
         \$ids = \$input['ids'] ?? [];
 
@@ -271,5 +256,5 @@ Console::line("  POST /api/{$table}/store");
 Console::line("  POST /api/{$table}/update");
 Console::line("  POST /api/{$table}/delete");
 Console::line("  POST /api/{$table}/bulk-delete");
-Console::line("- Features: JWT protected API, show, datatable, pagination, search/filter, bulk delete, ajax-friendly validation" . ($hasDeletedAt ? ', soft delete ready' : ''));
+Console::line("- Features: show, datatable, pagination, search/filter, bulk delete, ajax-friendly validation" . ($hasDeletedAt ? ', soft delete ready' : ''));
 Console::line("- Fields: " . implode(', ', array_map(fn($f) => $f['name'] . ':' . $f['type'], $fields)));

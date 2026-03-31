@@ -7,6 +7,10 @@ namespace Composer\Autoload;
 class ComposerStaticInit99352c1a546e8b76168c285c0a67ada6
 {
     public static $prefixLengthsPsr4 = array (
+        'F' =>
+        array (
+            'Firebase\\JWT\\' => 13,
+        ),
         'A' =>
         array (
             'App\\' => 4,
@@ -14,6 +18,10 @@ class ComposerStaticInit99352c1a546e8b76168c285c0a67ada6
     );
 
     public static $prefixDirsPsr4 = array (
+        'Firebase\\JWT\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
+        ),
         'App\\' =>
         array (
             0 => __DIR__ . '/../..' . '/app',
@@ -22,7 +30,9 @@ class ComposerStaticInit99352c1a546e8b76168c285c0a67ada6
 
     public static $classMap = array (
         'App\\Controllers\\ApiController' => __DIR__ . '/../..' . '/app/Controllers/ApiController.php',
+        'App\\Controllers\\Api\\AuthApiController' => __DIR__ . '/../..' . '/app/Controllers/Api/AuthApiController.php',
         'App\\Controllers\\Api\\CategoryApiController' => __DIR__ . '/../..' . '/app/Controllers/Api/CategoryApiController.php',
+        'App\\Controllers\\Api\\CustomerApiController' => __DIR__ . '/../..' . '/app/Controllers/Api/CustomerApiController.php',
         'App\\Controllers\\Api\\InvoiceApiController' => __DIR__ . '/../..' . '/app/Controllers/Api/InvoiceApiController.php',
         'App\\Controllers\\Api\\OrderApiController' => __DIR__ . '/../..' . '/app/Controllers/Api/OrderApiController.php',
         'App\\Controllers\\Api\\PaymentApiController' => __DIR__ . '/../..' . '/app/Controllers/Api/PaymentApiController.php',
@@ -31,6 +41,7 @@ class ComposerStaticInit99352c1a546e8b76168c285c0a67ada6
         'App\\Controllers\\BaseController' => __DIR__ . '/../..' . '/app/Controllers/BaseController.php',
         'App\\Controllers\\CategoryController' => __DIR__ . '/../..' . '/app/Controllers/CategoryController.php',
         'App\\Controllers\\CrudController' => __DIR__ . '/../..' . '/app/Controllers/CrudController.php',
+        'App\\Controllers\\CustomerController' => __DIR__ . '/../..' . '/app/Controllers/CustomerController.php',
         'App\\Controllers\\DashboardController' => __DIR__ . '/../..' . '/app/Controllers/DashboardController.php',
         'App\\Controllers\\HomeController' => __DIR__ . '/../..' . '/app/Controllers/HomeController.php',
         'App\\Controllers\\InvoiceController' => __DIR__ . '/../..' . '/app/Controllers/InvoiceController.php',
@@ -52,6 +63,7 @@ class ComposerStaticInit99352c1a546e8b76168c285c0a67ada6
         'App\\Core\\Filter' => __DIR__ . '/../..' . '/app/Core/Filter.php',
         'App\\Core\\Flash' => __DIR__ . '/../..' . '/app/Core/Flash.php',
         'App\\Core\\JsonRequest' => __DIR__ . '/../..' . '/app/Core/JsonRequest.php',
+        'App\\Core\\Jwt' => __DIR__ . '/../..' . '/app/Core/Jwt.php',
         'App\\Core\\Logger' => __DIR__ . '/../..' . '/app/Core/Logger.php',
         'App\\Core\\Migration' => __DIR__ . '/../..' . '/app/Core/Migration.php',
         'App\\Core\\Pagination' => __DIR__ . '/../..' . '/app/Core/Pagination.php',
@@ -67,6 +79,7 @@ class ComposerStaticInit99352c1a546e8b76168c285c0a67ada6
         'App\\Core\\Version' => __DIR__ . '/../..' . '/app/Core/Version.php',
         'App\\Core\\View' => __DIR__ . '/../..' . '/app/Core/View.php',
         'App\\Database\\Seeders\\CategorySeeder' => __DIR__ . '/../..' . '/app/Database/Seeders/CategorySeeder.php',
+        'App\\Database\\Seeders\\CustomerSeeder' => __DIR__ . '/../..' . '/app/Database/Seeders/CustomerSeeder.php',
         'App\\Database\\Seeders\\InvoiceSeeder' => __DIR__ . '/../..' . '/app/Database/Seeders/InvoiceSeeder.php',
         'App\\Database\\Seeders\\OrderSeeder' => __DIR__ . '/../..' . '/app/Database/Seeders/OrderSeeder.php',
         'App\\Database\\Seeders\\PaymentSeeder' => __DIR__ . '/../..' . '/app/Database/Seeders/PaymentSeeder.php',
@@ -75,21 +88,32 @@ class ComposerStaticInit99352c1a546e8b76168c285c0a67ada6
         'App\\Middleware\\AuditMiddleware' => __DIR__ . '/../..' . '/app/Middleware/AuditMiddleware.php',
         'App\\Middleware\\Auth' => __DIR__ . '/../..' . '/app/Middleware/Auth.php',
         'App\\Middleware\\Guest' => __DIR__ . '/../..' . '/app/Middleware/Guest.php',
+        'App\\Middleware\\JwtAuth' => __DIR__ . '/../..' . '/app/Middleware/JwtAuth.php',
         'App\\Middleware\\Role' => __DIR__ . '/../..' . '/app/Middleware/Role.php',
         'App\\Models\\BaseModel' => __DIR__ . '/../..' . '/app/Models/BaseModel.php',
         'App\\Models\\CategoryModel' => __DIR__ . '/../..' . '/app/Models/CategoryModel.php',
+        'App\\Models\\CustomerModel' => __DIR__ . '/../..' . '/app/Models/CustomerModel.php',
         'App\\Models\\InvoiceModel' => __DIR__ . '/../..' . '/app/Models/InvoiceModel.php',
         'App\\Models\\OrderModel' => __DIR__ . '/../..' . '/app/Models/OrderModel.php',
         'App\\Models\\PaymentModel' => __DIR__ . '/../..' . '/app/Models/PaymentModel.php',
         'App\\Models\\ProductModel' => __DIR__ . '/../..' . '/app/Models/ProductModel.php',
         'App\\Models\\UserModel' => __DIR__ . '/../..' . '/app/Models/UserModel.php',
         'App\\Requests\\StoreCategoryRequest' => __DIR__ . '/../..' . '/app/Requests/StoreCategoryRequest.php',
+        'App\\Requests\\StoreCustomerRequest' => __DIR__ . '/../..' . '/app/Requests/StoreCustomerRequest.php',
         'App\\Requests\\StoreInvoiceRequest' => __DIR__ . '/../..' . '/app/Requests/StoreInvoiceRequest.php',
         'App\\Requests\\StoreOrderRequest' => __DIR__ . '/../..' . '/app/Requests/StoreOrderRequest.php',
         'App\\Requests\\StorePaymentRequest' => __DIR__ . '/../..' . '/app/Requests/StorePaymentRequest.php',
         'App\\Requests\\StoreProductRequest' => __DIR__ . '/../..' . '/app/Requests/StoreProductRequest.php',
         'App\\Traits\\SwalTrait' => __DIR__ . '/../..' . '/app/Traits/SwalTrait.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Firebase\\JWT\\BeforeValidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/BeforeValidException.php',
+        'Firebase\\JWT\\CachedKeySet' => __DIR__ . '/..' . '/firebase/php-jwt/src/CachedKeySet.php',
+        'Firebase\\JWT\\ExpiredException' => __DIR__ . '/..' . '/firebase/php-jwt/src/ExpiredException.php',
+        'Firebase\\JWT\\JWK' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWK.php',
+        'Firebase\\JWT\\JWT' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWT.php',
+        'Firebase\\JWT\\JWTExceptionWithPayloadInterface' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWTExceptionWithPayloadInterface.php',
+        'Firebase\\JWT\\Key' => __DIR__ . '/..' . '/firebase/php-jwt/src/Key.php',
+        'Firebase\\JWT\\SignatureInvalidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/SignatureInvalidException.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

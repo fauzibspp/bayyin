@@ -4,6 +4,7 @@ return [
     'GET' => [
         '/api/users' => ['UserApiController', 'index'],
         '/api/users-datatable' => ['UserDataTableController', 'index'],
+        '/api/auth/me' => ['AuthApiController', 'me'],
         '/api/products' => ['ProductApiController', 'index'],
         '/api/categories' => ['CategoryApiController', 'index'],
         '/api/products/show' => ['ProductApiController', 'show'],
@@ -20,6 +21,7 @@ return [
         '/api/customers/show' => ['CustomerApiController', 'show'],
     ],
     'POST' => [
+        '/api/auth/login' => ['AuthApiController', 'login'],
         '/api/products/store' => ['ProductApiController', 'store'],
         '/api/products/update' => ['ProductApiController', 'update'],
         '/api/products/delete' => ['ProductApiController', 'delete'],

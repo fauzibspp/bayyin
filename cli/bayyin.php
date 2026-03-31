@@ -195,10 +195,16 @@ switch ($command) {
             'DB_NAME',
             'DB_USER',
             'SESSION_NAME',
+            'JWT_SECRET',
+            'JWT_ALGO', 
+            'JWT_TTL',
         ];
 
         foreach ($keys as $key) {
             $value = Config::get($key, '[NOT SET]');
+            if(in_array($key, ['DB_PASS','JWT_SECRET'], true)) {
+                $value = $value && $value !== '[NOT SET]' ? '[SET]' : '[NOT SET]';
+            } 
             Console::line(str_pad($key, 20) . ': ' . $value);
         }
         exit;
