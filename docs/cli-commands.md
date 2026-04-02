@@ -1,111 +1,112 @@
 # CLI Commands
 ## Core
 ### Serve development server
-``` 
+```bash
 php cli/bayyin.php serve [host] [port]
 
 Example:
 php cli/bayyin.php serve localhost 8080 or php cli/bayyin.php serve (default is localhost:8080)
+```
 
 ## Show framework version
-```
+```bash
 php cli/bayyin.php version
-```md
+```
 
 ## Show framwork summary
-```
+```bash
 php cli/bayyin.php about
-```md
+```
 
 ## Check current configuration
-```
+```bash
 php cli/bayyin.php config:check
-```md
+```
 
 ## Database
 ### Run migrations
-```
+```bash
 php cli/bayyin.php migrate
-```md
+```
 
 ### Roll back last migration batch
-```
+```bash
 php cli/bayyin.php rollback
-```md
+```
 
 ### Show migration status
-```
+```bash
 php cli/bayyin.php migrate:status
-```md
+```
 
 ### Run seeders
-```
+```bash
 php cli/bayyin.php make:migration create_users_table
-```md
+```
 
 ## Generators
 ### Make migration
-```
+```bash
 php cli/bayyin.php make:migration create_users_table
-```md
+```
 
 ### Make controller
-```
+```bash
 php cli/bayyin.php make:controller ProductController
-```md
+```
 
 ### Make model
-```
+```bash
 php cli/bayyin.php make:model ProductModel products
-```md
+```
 
 ### Make middleware
-```
+```bash
 php cli/bayyin.php make:middleware AuditMiddleware
-```md
+```
 
 ### Make simple module
-```
+```bash
 php cli/bayyin.php make:module Product products
-```md
+```
 
 ### Make seeder
-```
+```bash
 php cli/bayyin.php make:seeder ProductSeedar
-```md
+```
 
 ### Make simple module
-```
+```bash
 php cli/bayyin.php make:module Product products
-```md
+```
 
 ### Make seeder
-```
+```bash
 php cli/bayyin.php make:seeder ProductSeeder
-```md
+```
 
 ### Make request
-```
+```bash
 php cli/bayyin.php make:request StoreProductRequest
-```md
+```
 
 ### Make web CRUD
-```
+```bash
 php cli/bayyin.php make:crud Product products "name:string,price:decimal,stock:int"
-```md
+```
 
 ### Make API CRUD
-```
+```bash
 php cli/bayyin.php make:api-crud Product products "name:string,price:decimal,stock:int"
-```md
+```
 
 ### Make full module
-```
+```bash
 php cli/bayyin.php make:full-module Product products "name:string,price:decimal,stock:int"
-```md
+```
 
 ## Routing
 ### List all routes
-```
+```bash
 php cli/bayyin.php route:list
-```md
+```

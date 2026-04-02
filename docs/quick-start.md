@@ -21,10 +21,12 @@ Endpoint:
 POST /api/auth/login
 
 Body JSON:
+```bash
   {
   "email": "admin@example.com",
   "password": "password123"
   }
+```
 
 ## Test protected API use
 Use Bearer token from login response.

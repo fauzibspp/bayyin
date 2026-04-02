@@ -25,16 +25,22 @@ Set values for:
 - JWT_TTL
 
 ## 5. Run migrations
+```bash
 php cli/bayyin.php migrate
+```
 
 ## 6. Start development server
+```bash
 php cli/bayyin.php serve
+```
 
 Default URL:
 http://localhost:8080
 
 ## 7. Verify framework
 Run:
+```bash
 php cli/bayyin.php help
 php cli/bayyin.php route:list
 php cli/bayyin.php config:check
+```

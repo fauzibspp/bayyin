@@ -4,31 +4,31 @@ Bayyin uses session-based authentication for web routes and JWT authentication
 
 ## Environment settings
 Set the following values in `.env`:
-```
+```bash
 JWT_SECRET=change_this_to_a_long_random_secret_key
 JWT_ALGO=HS256
 JWT_TTL=3600
-```md
+```
 
 ## Login endpoint (request) POST:
 Request
-```
+```bash
 POST /api/auth/login
-```md
+```
 
 http://localhost:8080/api/auth/login
 Set in body via postman app
 Body:
-```
+```bash
   {
   "email": "admin@example.com",
   "password": "password123"
   }
-```md
+```
 
 Response
 Json:
-```
+```bash
 {
 "success": true,
 "message": "Login successful.",
@@ -45,18 +45,19 @@ Json:
 },
 "meta": []
 }
-```md
+```
 
 # Authenticated user endpoint
 Request
-```
+```bash
   GET /api/auth/me
-```md
+```
 
 http://localhost:8080/api/auth/me
 Authorization -> Auth Type: Bearer Token
 Copy and paste the token from the response result above
 Press send button and the result like:
+```bash
   {
   "success": true,
   "message": "Authenticated user fetched successfully.",
@@ -70,7 +71,7 @@ Press send button and the result like:
   },
   "meta": []
   }
-
+```
 # Generated API module protection
 Generated API CRUD modules use JWT protection by default.
 
@@ -92,7 +93,7 @@ Usually require admin role:
 
 # Common error responses
 ## Missing token
-```
+```bash
 {
   "success": false,
   "message": "Unauthorized.",
@@ -102,10 +103,10 @@ Usually require admin role:
     ]
   }
 }
-```md
+```
 
 ## Invalid token
-```
+```bash
 {
   "success": false,
   "message": "Invalid or expired token.",
@@ -115,10 +116,10 @@ Usually require admin role:
     ]
   }
 }
-```md
+```
 
 ## Forbidden role
-```
+```bash
 {
   "success": false,
   "message": ".",Forbidden
@@ -128,4 +129,4 @@ Usually require admin role:
     ]
   }
 }
-```md
+```
