@@ -29,6 +29,11 @@ return [
         '/api/demos/show' => ['DemoApiController', 'show'],
         '/api/demos/export' => ['DemoApiController', 'exportCsv'],
         '/api/demos/trash' => ['DemoApiController', 'trash'],
+        '/api/samples' => ['SampleApiController', 'index'],
+        '/api/samples/datatable' => ['SampleApiController', 'datatable'],
+        '/api/samples/show' => ['SampleApiController', 'show'],
+        '/api/samples/export' => ['SampleApiController', 'exportCsv'],
+        '/api/samples/trash' => ['SampleApiController', 'trash'],
     ],
     'POST' => [
         '/api/auth/login' => ['AuthApiController', 'login'],
@@ -62,5 +67,10 @@ return [
         '/api/demos/update' => ['DemoApiController', 'update'],
         '/api/demos/delete' => ['DemoApiController', 'delete'],
         '/api/demos/bulk-delete' => ['DemoApiController', 'bulkDelete'],
+        '/api/samples/restore' => ['SampleApiController', 'restore'],
+        '/api/samples/store' => ['SampleApiController', 'store'],
+        '/api/samples/update' => ['SampleApiController', 'update'],
+        '/api/samples/delete' => ['SampleApiController', 'delete'],
+        '/api/samples/bulk-delete' => ['SampleApiController', 'bulkDelete'],
     ],
 ];
