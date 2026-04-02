@@ -4,11 +4,14 @@
 Place Bayyin in your project directory.
 
 ## 2. Install Composer dependencies
+```bash
 composer install
-
+```
 Or if dependencies are already defined and vendor is missing:
 
+```bash
 composer dump-autoload
+```
 
 ## 3. Create environment file
 Copy `.env.example` to `.env`
