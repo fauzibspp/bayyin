@@ -5,7 +5,7 @@ namespace App\Core;
 class Version
 {
     public const NAME = 'Bayyin';
-    public const VERSION = '2.6.0';
+    public const VERSION = '2.9.0';
 
     public static function getVersion(): string
     {

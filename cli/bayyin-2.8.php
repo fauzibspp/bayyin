@@ -19,20 +19,13 @@ $arg3 = $argv[4] ?? null;
 
 if ($command === '' || in_array($command, ['help', '--help', '-h'], true)) {
     Console::line(Version::getFull() . ' CLI');
-    Console::line(str_repeat('-', 60));
-    Console::line('Core:');
+    Console::line(str_repeat('-', 50));
+    Console::line('Usage:');
     Console::line('  php cli/bayyin.php serve [host] [port]');
-    Console::line('  php cli/bayyin.php version');
-    Console::line('  php cli/bayyin.php about');
-    Console::line('  php cli/bayyin.php config:check');
-    Console::line('');
-    Console::line('Database:');
     Console::line('  php cli/bayyin.php migrate');
     Console::line('  php cli/bayyin.php rollback');
     Console::line('  php cli/bayyin.php migrate:status');
     Console::line('  php cli/bayyin.php seed');
-    Console::line('');
-    Console::line('Generators:');
     Console::line('  php cli/bayyin.php make:migration create_users_table');
     Console::line('  php cli/bayyin.php make:controller ProductController');
     Console::line('  php cli/bayyin.php make:model ProductModel products');
@@ -43,9 +36,8 @@ if ($command === '' || in_array($command, ['help', '--help', '-h'], true)) {
     Console::line('  php cli/bayyin.php make:crud Product products "name:string,price:decimal,stock:int"');
     Console::line('  php cli/bayyin.php make:api-crud Product products "name:string,price:decimal,stock:int"');
     Console::line('  php cli/bayyin.php make:full-module Product products "name:string,price:decimal,stock:int,is_active:boolean,description:text"');
-    Console::line('');
-    Console::line('Routing:');
     Console::line('  php cli/bayyin.php route:list');
+    Console::line('  php cli/bayyin.php config:check');
     exit;
 }
 
@@ -60,23 +52,13 @@ switch ($command) {
             exit(1);
         }
 
-        Console::info('Starting ' . Version::getFull() . " on http://{$host}:{$port}");
+        Console::info('Starting ' . Version::full() . " on http://{$host}:{$port}");
         passthru(sprintf(
             'php -S %s:%s -t %s',
             escapeshellarg($host),
             escapeshellarg($port),
             escapeshellarg($publicPath)
         ));
-        exit;
-    
-    case 'version':
-        Console::line(Version::getFull());
-        exit;
-    
-    case 'about':
-        Console::line(Version::getFull());
-        Console::line('Lightweight PHP MVC framework with CLI scaffolding, migrations, seeders, CRUD generation, JWT API auth, DataTables-ready modules, and lifecycle support.');
-        Console::line('GitHub: https://github.com/fauzibspp/bayyin');
         exit;
 
     case 'migrate':
@@ -145,6 +127,16 @@ switch ($command) {
         require dirname(__DIR__) . '/cli/make-module.php';
         exit;
     
+    case 'make:full-module':
+        if (!$arg1 || !$arg2) {
+            Console::error('Usage: php cli/bayyin.php make:full-module Product products "name:string,price:decimal"');
+            exit(1);
+        }
+        $arg3 = $argv[4] ?? null;
+        $argv = [$argv[0], $arg1, $arg2, $arg3];
+        require dirname(__DIR__) . '/cli/make-full-module.php';
+        exit;
+
     case 'make:seeder':
         if (!$arg1) {
             Console::error('Seeder name is required.');
@@ -164,7 +156,7 @@ switch ($command) {
         $argv = [$argv[0], $arg1];
         require dirname(__DIR__) . '/cli/make-request.php';
         exit;
-    
+
     case 'make:crud':
         if (!$arg1 || !$arg2) {
             Console::error('Usage: php cli/bayyin.php make:crud Product products "name:string,price:decimal"');
@@ -215,16 +207,6 @@ switch ($command) {
             } 
             Console::line(str_pad($key, 20) . ': ' . $value);
         }
-        exit;
-
-    case 'make:full-module':
-        if (!$arg1 || !$arg2) {
-            Console::error('Usage: php cli/bayyin.php make:full-module Product products "name:string,price:decimal"');
-            exit(1);
-        }
-        $arg3 = $argv[4] ?? null;
-        $argv = [$argv[0], $arg1, $arg2, $arg3];
-        require dirname(__DIR__) . '/cli/make-full-module.php';
         exit;
 
     default:

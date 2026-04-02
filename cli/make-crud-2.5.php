@@ -3,7 +3,6 @@
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Core\Console;
-use App\Core\GeneratorHelper;
 use App\Core\RouteEditor;
 use App\Core\SchemaParser;
 
@@ -45,66 +44,28 @@ $modelPath = $modelsDir . '/' . $modelName . '.php';
 $requestPath = $requestsDir . '/' . $requestName . '.php';
 $seederPath = $seedersDir . '/' . $seederName . '.php';
 
-$hasDeletedAt = GeneratorHelper::hasDeletedAt($fields);
-$fillableBlock = GeneratorHelper::buildFillableBlock($fields);
-$rulesBlock = GeneratorHelper::buildRulesBlock($fields);
-$messagesBlock = GeneratorHelper::buildMessagesBlock($fields);
+$fillableLines = [];
+$hasDeletedAt = false;
 
-$columnHeaders = GeneratorHelper::buildColumnHeaders($fields);
-$columnsJs = GeneratorHelper::buildColumnsJs($fields);
-$showFields = GeneratorHelper::buildShowFields($fields);
-$modalCreateFields = GeneratorHelper::buildModalCreateFields($fields);
-$modalEditFields = GeneratorHelper::buildModalEditFields($fields);
-$editHydrationJs = GeneratorHelper::buildEditModalJsHydration($fields);
-$editSerializeJs = GeneratorHelper::buildEditModalJsSerialize($fields);
-
-$trashMethods = $hasDeletedAt ? <<<PHP
-
-    public function trash(): void
-    {
-        \$success = Flash::get('success');
-        \$error = Flash::get('error');
-        \$items = method_exists(\$this->model, 'trash') ? \$this->model->trash(1, 100) : [];
-        \$this->view('{$viewFolder}/trash', compact('success', 'error', 'items'));
+foreach ($fields as $field) {
+    if ($field['name'] === 'deleted_at') {
+        $hasDeletedAt = true;
     }
+    $fillableLines[] = "        '{$field['name']}',";
+}
+$fillableLines[] = "        'created_at',";
+$fillableLines[] = "        'updated_at',";
+$fillableBlock = implode("\n", $fillableLines);
 
-    public function restore(): void
-    {
-        \$id = (int) (\$_GET['id'] ?? \$_POST['id'] ?? 0);
-
-        if (\$id <= 0) {
-            Flash::set('error', 'Invalid record id.');
-            \$this->redirect(\$this->routePath . '/trash');
-        }
-
-        if (method_exists(\$this->model, 'restore') && \$this->model->restore(\$id)) {
-            \\App\\Core\\AuditLogger::log('{$table}', 'restore', \$id);
-            Flash::set('success', '{$module} restored successfully.');
-        } else {
-            Flash::set('error', 'Failed to restore record.');
-        }
-
-        \$this->redirect(\$this->routePath . '/trash');
+$ruleLines = [];
+foreach ($fields as $field) {
+    if ($field['name'] === 'deleted_at') {
+        continue;
     }
-PHP : '';
-
-$deleteLogic = $hasDeletedAt
-    ? <<<PHP
-        if (\$this->model->update(\$id, ['deleted_at' => date('Y-m-d H:i:s')])) {
-            \\App\\Core\\AuditLogger::log('{$table}', 'soft_delete', \$id);
-            Flash::set('success', '{$module} soft deleted successfully.');
-        } else {
-            Flash::set('error', 'Failed to delete record.');
-        }
-PHP
-    : <<<PHP
-        if (\$this->model->delete(\$id)) {
-            \\App\\Core\\AuditLogger::log('{$table}', 'delete', \$id);
-            Flash::set('success', '{$module} deleted successfully.');
-        } else {
-            Flash::set('error', 'Failed to delete record.');
-        }
-PHP;
+    $rule = SchemaParser::validationRule($field['type']);
+    $ruleLines[] = "            '{$field['name']}' => '{$rule}',";
+}
+$rulesBlock = implode("\n", $ruleLines);
 
 if (!file_exists($controllerPath)) {
     $controllerTemplate = <<<PHP
@@ -146,31 +107,6 @@ class {$controllerName} extends CrudController
         \$this->view('{$viewFolder}/show', compact('data'));
     }
 
-    public function export(): void
-    {
-        \$rows = method_exists(\$this->model, 'allActive') ? \$this->model->allActive() : \$this->model->all();
-
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="{$table}.csv"');
-
-        \$out = fopen('php://output', 'w');
-
-        if (!\$out) {
-            exit;
-        }
-
-        if (!empty(\$rows)) {
-            fputcsv(\$out, array_keys(\$rows[0]));
-            foreach (\$rows as \$row) {
-                fputcsv(\$out, \$row);
-            }
-        }
-
-        fclose(\$out);
-        exit;
-    }
-{$trashMethods}
-
     public function create(): void
     {
         \$error = null;
@@ -189,7 +125,12 @@ class {$controllerName} extends CrudController
             \$data = [
 PHP;
 
-    $controllerTemplate .= GeneratorHelper::buildPostAssignments($fields);
+    foreach ($fields as $field) {
+        if ($field['name'] === 'deleted_at') {
+            continue;
+        }
+        $controllerTemplate .= "\n                '{$field['name']}' => \$_POST['{$field['name']}'] ?? null,";
+    }
 
     $controllerTemplate .= <<<PHP
 
@@ -199,7 +140,6 @@ PHP;
             \$id = \$this->model->create(\$data);
 
             if (\$id > 0) {
-                \\App\\Core\\AuditLogger::log('{$table}', 'create', \$id, \$data);
                 Flash::set('success', '{$module} created successfully.');
                 \$this->redirect(\$this->routePath);
             }
@@ -233,7 +173,12 @@ PHP;
             \$updateData = [
 PHP;
 
-    $controllerTemplate .= GeneratorHelper::buildPostAssignments($fields);
+    foreach ($fields as $field) {
+        if ($field['name'] === 'deleted_at') {
+            continue;
+        }
+        $controllerTemplate .= "\n                '{$field['name']}' => \$_POST['{$field['name']}'] ?? null,";
+    }
 
     $controllerTemplate .= <<<PHP
 
@@ -241,7 +186,6 @@ PHP;
             ];
 
             if (\$this->model->update(\$id, \$updateData)) {
-                \\App\\Core\\AuditLogger::log('{$table}', 'update', \$id, \$updateData);
                 Flash::set('success', '{$module} updated successfully.');
                 \$this->redirect(\$this->routePath);
             }
@@ -262,7 +206,27 @@ PHP;
             \$this->redirect(\$this->routePath);
         }
 
-{$deleteLogic}
+PHP;
+
+    if ($hasDeletedAt) {
+        $controllerTemplate .= <<<PHP
+        if (\$this->model->update(\$id, ['deleted_at' => date('Y-m-d H:i:s')])) {
+            Flash::set('success', '{$module} soft deleted successfully.');
+        } else {
+            Flash::set('error', 'Failed to delete record.');
+        }
+PHP;
+    } else {
+        $controllerTemplate .= <<<PHP
+        if (\$this->model->delete(\$id)) {
+            Flash::set('success', '{$module} deleted successfully.');
+        } else {
+            Flash::set('error', 'Failed to delete record.');
+        }
+PHP;
+    }
+
+    $controllerTemplate .= <<<PHP
 
         \$this->redirect(\$this->routePath);
     }
@@ -307,7 +271,17 @@ class {$requestName}
     public static function messages(): array
     {
         return [
-{$messagesBlock}
+PHP;
+
+    foreach ($fields as $field) {
+        if ($field['name'] === 'deleted_at') {
+            continue;
+        }
+        $requestTemplate .= "\n            '{$field['name']}.required' => '" . ucwords(str_replace('_', ' ', $field['name'])) . " is required.',";
+    }
+
+    $requestTemplate .= <<<PHP
+
         ];
     }
 }
@@ -336,65 +310,109 @@ PHP;
     file_put_contents($seederPath, $seederTemplate);
 }
 
-$trashView = $hasDeletedAt ? <<<PHP
-<?php
-\$moduleTitle = '{$module}';
-\$viewPath = '{$viewFolder}';
-\$items = \$items ?? [];
-\$success = \$success ?? null;
-\$error = \$error ?? null;
-?>
+$columnHeaders = '';
+$columnsJs = '';
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0"><?= htmlspecialchars(\$moduleTitle) ?> Trash</h1>
-    <a href="/<?= htmlspecialchars(\$viewPath) ?>" class="btn btn-secondary">Back</a>
-</div>
+foreach ($fields as $field) {
+    if ($field['name'] === 'deleted_at') {
+        continue;
+    }
+    $label = ucwords(str_replace('_', ' ', $field['name']));
+    $columnHeaders .= "\n                    <th>{$label}</th>";
+    $columnsJs .= "\n                { data: '{$field['name']}' },";
+}
 
-<?php if (!empty(\$success)): ?>
-    <div class="alert alert-success"><?= htmlspecialchars(\$success) ?></div>
-<?php endif; ?>
+$createFields = '';
+$editFields = '';
+$showFields = '';
 
-<?php if (!empty(\$error)): ?>
-    <div class="alert alert-danger"><?= htmlspecialchars(\$error) ?></div>
-<?php endif; ?>
+foreach ($fields as $field) {
+    $name = $field['name'];
 
-<div class="card">
-    <div class="card-body">
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th width="80">ID</th>
-                    <th>Name</th>
-                    <th width="180">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty(\$items)): ?>
-                    <?php foreach (\$items as \$row): ?>
-                        <tr>
-                            <td><?= (int) (\$row['id'] ?? 0) ?></td>
-                            <td><?= htmlspecialchars((string) (\$row['name'] ?? '')) ?></td>
-                            <td>
-                                <a href="/<?= htmlspecialchars(\$viewPath) ?>/restore?id=<?= (int) (\$row['id'] ?? 0) ?>" class="btn btn-success btn-sm">
-                                    Restore
-                                </a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="3" class="text-center text-muted">No deleted records found.</td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+    if ($name === 'deleted_at') {
+        continue;
+    }
+
+    $label = ucwords(str_replace('_', ' ', $name));
+    $type = $field['type'];
+
+    $showFields .= <<<PHP
+
+        <tr>
+            <th width="220">{$label}</th>
+            <td><?= htmlspecialchars((string) (\$data['{$name}'] ?? '')) ?></td>
+        </tr>
+PHP;
+
+    if (SchemaParser::isTextarea($type)) {
+        $createFields .= <<<PHP
+
+            <div class="form-group">
+                <label for="{$name}">{$label}</label>
+                <textarea name="{$name}" id="{$name}" class="form-control" rows="4" required><?= htmlspecialchars((string) (\$old['{$name}'] ?? '')) ?></textarea>
+            </div>
+PHP;
+
+        $editFields .= <<<PHP
+
+            <div class="form-group">
+                <label for="{$name}">{$label}</label>
+                <textarea name="{$name}" id="{$name}" class="form-control" rows="4" required><?= htmlspecialchars((string) (\$data['{$name}'] ?? '')) ?></textarea>
+            </div>
+PHP;
+    } elseif (SchemaParser::isCheckbox($type)) {
+        $createFields .= <<<PHP
+
+            <div class="form-group form-check">
+                <input type="hidden" name="{$name}" value="0">
+                <input type="checkbox" name="{$name}" id="{$name}" value="1" class="form-check-input" <?= !empty(\$old['{$name}']) ? 'checked' : '' ?>>
+                <label class="form-check-label" for="{$name}">{$label}</label>
+            </div>
+PHP;
+
+        $editFields .= <<<PHP
+
+            <div class="form-group form-check">
+                <input type="hidden" name="{$name}" value="0">
+                <input type="checkbox" name="{$name}" id="{$name}" value="1" class="form-check-input" <?= !empty(\$data['{$name}']) ? 'checked' : '' ?>>
+                <label class="form-check-label" for="{$name}">{$label}</label>
+            </div>
+PHP;
+    } else {
+        $inputType = SchemaParser::inputType($type);
+        $step = $type === 'decimal' ? ' step="0.01"' : '';
+
+        $createFields .= <<<PHP
+
+            <div class="form-group">
+                <label for="{$name}">{$label}</label>
+                <input type="{$inputType}" name="{$name}" id="{$name}" value="<?= htmlspecialchars((string) (\$old['{$name}'] ?? '')) ?>" class="form-control"{$step} required>
+            </div>
+PHP;
+
+        $editFields .= <<<PHP
+
+            <div class="form-group">
+                <label for="{$name}">{$label}</label>
+                <input type="{$inputType}" name="{$name}" id="{$name}" value="<?= htmlspecialchars((string) (\$data['{$name}'] ?? '')) ?>" class="form-control"{$step} required>
+            </div>
+PHP;
+    }
+}
+
+$validationBlock = <<<'PHP'
+<?php if (!empty($validationErrors) && is_array($validationErrors)): ?>
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            <?php foreach ($validationErrors as $fieldErrors): ?>
+                <?php foreach ((array) $fieldErrors as $message): ?>
+                    <li><?= htmlspecialchars($message) ?></li>
+                <?php endforeach; ?>
+            <?php endforeach; ?>
+        </ul>
     </div>
-</div>
-PHP : '';
-
-$indexExtraButtons = $hasDeletedAt
-    ? '<a href="/<?= htmlspecialchars($viewPath) ?>/trash" class="btn btn-warning mr-2">Trash</a>'
-    : '';
+<?php endif; ?>
+PHP;
 
 $indexView = <<<PHP
 <?php
@@ -407,8 +425,6 @@ $indexView = <<<PHP
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0"><?= htmlspecialchars(\$moduleTitle) ?> Listing</h1>
     <div>
-        {$indexExtraButtons}
-        <a href="/<?= htmlspecialchars(\$viewPath) ?>/export" class="btn btn-info mr-2">Export CSV</a>
         <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#modal-create-{$viewFolder}">
             <i class="fas fa-plus"></i> Add New
         </button>
@@ -435,8 +451,7 @@ $indexView = <<<PHP
             <thead>
                 <tr>
                     <th width="40"><input type="checkbox" id="check-all-{$viewFolder}"></th>
-                    <th width="80">ID</th>
-{$columnHeaders}
+                    <th width="80">ID</th>{$columnHeaders}
                     <th width="260">Actions</th>
                 </tr>
             </thead>
@@ -454,7 +469,81 @@ $indexView = <<<PHP
                 </div>
                 <div class="modal-body">
                     <div id="create-errors-{$viewFolder}" class="alert alert-danger d-none"></div>
-{$modalCreateFields}
+PHP;
+
+$modalCreateFields = '';
+$modalEditFields = '';
+
+foreach ($fields as $field) {
+    $name = $field['name'];
+
+    if ($name === 'deleted_at') {
+        continue;
+    }
+
+    $label = ucwords(str_replace('_', ' ', $name));
+    $type = $field['type'];
+
+    if (SchemaParser::isTextarea($type)) {
+        $modalCreateFields .= <<<PHP
+
+                    <div class="form-group">
+                        <label for="create_{$name}">{$label}</label>
+                        <textarea name="{$name}" id="create_{$name}" class="form-control" rows="4" required></textarea>
+                    </div>
+PHP;
+
+        $modalEditFields .= <<<PHP
+
+                    <div class="form-group">
+                        <label for="edit_{$name}">{$label}</label>
+                        <textarea name="{$name}" id="edit_{$name}" class="form-control" rows="4" required></textarea>
+                    </div>
+PHP;
+    } elseif (SchemaParser::isCheckbox($type)) {
+        $modalCreateFields .= <<<PHP
+
+                    <div class="form-group form-check">
+                        <input type="hidden" name="{$name}" value="0">
+                        <input type="checkbox" name="{$name}" id="create_{$name}" value="1" class="form-check-input">
+                        <label class="form-check-label" for="create_{$name}">{$label}</label>
+                    </div>
+PHP;
+
+        $modalEditFields .= <<<PHP
+
+                    <div class="form-group form-check">
+                        <input type="hidden" name="{$name}" value="0">
+                        <input type="checkbox" name="{$name}" id="edit_{$name}" value="1" class="form-check-input">
+                        <label class="form-check-label" for="edit_{$name}">{$label}</label>
+                    </div>
+PHP;
+    } else {
+        $inputType = SchemaParser::inputType($type);
+        $step = $type === 'decimal' ? ' step="0.01"' : '';
+
+        $modalCreateFields .= <<<PHP
+
+                    <div class="form-group">
+                        <label for="create_{$name}">{$label}</label>
+                        <input type="{$inputType}" name="{$name}" id="create_{$name}" class="form-control"{$step} required>
+                    </div>
+PHP;
+
+        $modalEditFields .= <<<PHP
+
+                    <div class="form-group">
+                        <label for="edit_{$name}">{$label}</label>
+                        <input type="{$inputType}" name="{$name}" id="edit_{$name}" class="form-control"{$step} required>
+                    </div>
+PHP;
+    }
+}
+
+$indexView .= $modalCreateFields;
+
+$indexView .= <<<PHP
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Save</button>
@@ -476,7 +565,12 @@ $indexView = <<<PHP
                 </div>
                 <div class="modal-body">
                     <div id="edit-errors-{$viewFolder}" class="alert alert-danger d-none"></div>
-{$modalEditFields}
+PHP;
+
+$indexView .= $modalEditFields;
+
+$indexView .= <<<PHP
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Update</button>
@@ -502,8 +596,7 @@ $(function () {
                     return '<input type="checkbox" class="row-check" value="' + row.id + '">';
                 }
             },
-            { data: 'id' },
-{$columnsJs}
+            { data: 'id' },{$columnsJs}
             {
                 data: null,
                 orderable: false,
@@ -511,7 +604,7 @@ $(function () {
                 render: function (data, type, row) {
                     return ''
                         + '<a href="/{$viewFolder}/show?id=' + row.id + '" class="btn btn-info btn-sm mr-1">View</a>'
-                        + '<button type="button" class="btn btn-warning btn-sm mr-1 btn-edit" data-row=\\'' + JSON.stringify(row) + '\\'>Edit</button>'
+                        + '<button type="button" class="btn btn-warning btn-sm mr-1 btn-edit" data-row=\'' + JSON.stringify(row) + '\'>Edit</button>'
                         + '<button type="button" class="btn btn-danger btn-sm btn-delete" data-id="' + row.id + '">Delete</button>';
                 }
             }
@@ -564,7 +657,22 @@ $(function () {
         const row = $(this).data('row');
         clearErrors('#edit-errors-{$viewFolder}');
         $('#edit_id_{$viewFolder}').val(row.id);
-{$editHydrationJs}
+PHP;
+
+foreach ($fields as $field) {
+    $name = $field['name'];
+    if ($name === 'deleted_at') {
+        continue;
+    }
+    if (SchemaParser::isCheckbox($field['type'])) {
+        $indexView .= "\n        $('#edit_{$name}').prop('checked', !!parseInt(row.{$name} || 0, 10));";
+    } else {
+        $indexView .= "\n        $('#edit_{$name}').val(row.{$name} || '');";
+    }
+}
+
+$indexView .= <<<PHP
+
         $('#modal-edit-{$viewFolder}').modal('show');
     });
 
@@ -576,7 +684,20 @@ $(function () {
         $(this).serializeArray().forEach(function (item) {
             data[item.name] = item.value;
         });
-{$editSerializeJs}
+PHP;
+
+foreach ($fields as $field) {
+    $name = $field['name'];
+    if ($name === 'deleted_at') {
+        continue;
+    }
+    if (SchemaParser::isCheckbox($field['type'])) {
+        $indexView .= "\n        data['{$name}'] = $('#edit_{$name}').is(':checked') ? 1 : 0;";
+    }
+}
+
+$indexView .= <<<PHP
+
         $.ajax({
             url: '/api/{$viewFolder}/update',
             type: 'POST',
@@ -652,6 +773,22 @@ $(function () {
 </script>
 PHP;
 
+$showFields = '';
+foreach ($fields as $field) {
+    $name = $field['name'];
+    if ($name === 'deleted_at') {
+        continue;
+    }
+    $label = ucwords(str_replace('_', ' ', $name));
+    $showFields .= <<<PHP
+
+        <tr>
+            <th width="220">{$label}</th>
+            <td><?= htmlspecialchars((string) (\$data['{$name}'] ?? '')) ?></td>
+        </tr>
+PHP;
+}
+
 $showView = <<<PHP
 <?php
 \$moduleTitle = '{$module}';
@@ -694,10 +831,6 @@ $views = [
     'edit.php' => $editView,
     'show.php' => $showView,
 ];
-
-if ($hasDeletedAt) {
-    $views['trash.php'] = $trashView;
-}
 
 foreach ($views as $file => $content) {
     $path = $viewsDir . '/' . $file;
@@ -750,12 +883,6 @@ if (class_exists(RouteEditor::class)) {
     RouteEditor::addWebRoute("/{$viewFolder}/edit", "{$controllerName}", "edit");
     RouteEditor::addWebRoute("/{$viewFolder}/delete", "{$controllerName}", "delete");
     RouteEditor::addWebRoute("/{$viewFolder}/show", "{$controllerName}", "show");
-    RouteEditor::addWebRoute("/{$viewFolder}/export", "{$controllerName}", "export");
-
-    if ($hasDeletedAt) {
-        RouteEditor::addWebRoute("/{$viewFolder}/trash", "{$controllerName}", "trash");
-        RouteEditor::addWebRoute("/{$viewFolder}/restore", "{$controllerName}", "restore");
-    }
 }
 
 Console::success("CRUD scaffold created for {$module}");
@@ -766,6 +893,6 @@ Console::line("- Request: {$requestName}.php");
 Console::line("- Seeder: {$seederName}.php");
 Console::line("- Views: {$viewFolder}/");
 Console::line("- Migration: " . basename($migrationFile));
-Console::line("- Routes auto registered: /{$viewFolder}, /create, /edit, /delete, /show, /export" . ($hasDeletedAt ? ', /trash, /restore' : ''));
-Console::line("- Features: audit log integration, CSV export, modal forms, AJAX create/update/delete, bulk delete, DataTables-ready index" . ($hasDeletedAt ? ', soft delete ready' : ''));
+Console::line("- Routes auto registered: /{$viewFolder}, /create, /edit, /delete, /show");
+Console::line("- Features: modal forms, AJAX create/update/delete, bulk delete, DataTables-ready index" . ($hasDeletedAt ? ', soft delete ready' : ''));
 Console::line("- Fields: " . implode(', ', array_map(fn($f) => $f['name'] . ':' . $f['type'], $fields)));

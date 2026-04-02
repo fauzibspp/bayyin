@@ -17,7 +17,6 @@ $module = preg_replace('/[^A-Za-z0-9_]/', '', $module);
 $table = strtolower(trim($table));
 
 Console::info("Generating full module for {$module}...");
-
 /*
 |--------------------------------------------------------------------------
 | Step 1: Generate Web CRUD
@@ -41,9 +40,6 @@ Console::line('- Web modal create/edit forms');
 Console::line('- Web AJAX create/update/delete');
 Console::line('- Web DataTables-ready listing');
 Console::line('- Web bulk delete flow');
-Console::line('- Web export CSV');
-Console::line('- Web trash/restore when soft delete exists');
-Console::line('- Web audit logging integration');
 Console::line('- API CRUD scaffold');
 Console::line('- API JWT protection');
 Console::line('- API show endpoint');
@@ -52,14 +48,11 @@ Console::line('- API pagination');
 Console::line('- API search/filter support');
 Console::line('- API validation helper');
 Console::line('- API bulk delete endpoint');
-Console::line('- API export CSV endpoint');
-Console::line('- API trash/restore when soft delete exists');
-Console::line('- API audit logging integration');
 Console::line('- Migration');
 Console::line('- Seeder');
 Console::line('- Request class');
 Console::line('- Web route registration');
 Console::line('- API route registration');
-Console::line('- Better lifecycle management structure');
+Console::line('- Better AJAX-ready admin structure');
 
 exit;

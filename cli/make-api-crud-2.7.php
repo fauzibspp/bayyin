@@ -3,7 +3,6 @@
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Core\Console;
-use App\Core\GeneratorHelper;
 use App\Core\RouteEditor;
 use App\Core\SchemaParser;
 
@@ -31,12 +30,34 @@ if (!is_dir($controllersDir)) {
 
 $controllerPath = $controllersDir . '/' . $controllerName . '.php';
 
-$hasDeletedAt = GeneratorHelper::hasDeletedAt($fields);
-$validationBlock = GeneratorHelper::buildValidationChecks($fields);
-$createDataBlock = GeneratorHelper::buildJsonAssignments($fields);
-$updateDataBlock = GeneratorHelper::buildJsonAssignments($fields);
-$searchableFieldsBlock = GeneratorHelper::buildSearchableFieldsBlock($fields);
-$exportFieldsBlock = GeneratorHelper::buildExportFieldsBlock($fields);
+$fieldAssignments = [];
+$updateAssignments = [];
+$validationChecks = [];
+$searchableFields = [];
+$exportFields = ["'id'"];
+$hasDeletedAt = false;
+
+foreach ($fields as $field) {
+    $name = $field['name'];
+    $label = ucwords(str_replace('_', ' ', $name));
+    $exportFields[] = "'{$name}'";
+
+    if ($name === 'deleted_at') {
+        $hasDeletedAt = true;
+        continue;
+    }
+
+    $validationChecks[] = "        if (!array_key_exists('{$name}', \$input) || \$input['{$name}'] === '') {\n            \$errors['{$name}'][] = '{$label} is required.';\n        }";
+    $fieldAssignments[] = "            '{$name}' => \$input['{$name}'],";
+    $updateAssignments[] = "            '{$name}' => \$input['{$name}'],";
+    $searchableFields[] = "'{$name}'";
+}
+
+$validationBlock = implode("\n", $validationChecks);
+$createDataBlock = implode("\n", $fieldAssignments);
+$updateDataBlock = implode("\n", $updateAssignments);
+$searchableFieldsBlock = implode(', ', $searchableFields);
+$exportFieldsBlock = implode(', ', $exportFields);
 
 $deleteLogic = $hasDeletedAt
     ? "\$this->model->update((int) \$input['id'], ['deleted_at' => date('Y-m-d H:i:s')]);"
@@ -89,6 +110,11 @@ $trashMethods = $hasDeletedAt ? <<<PHP
         \$this->success(null, '{$module} restored successfully.');
     }
 PHP : '';
+
+$trashRoutes = $hasDeletedAt ? <<<TXT
+Console::line("  GET  /api/{$table}/trash");
+Console::line("  POST /api/{$table}/restore");
+TXT : '';
 
 if (!file_exists($controllerPath)) {
     $template = <<<PHP
@@ -208,7 +234,7 @@ class {$controllerName} extends ApiController
     {
         JwtAuth::handle();
 
-        \$rows = method_exists(\$this->model, 'allActive') ? \$this->model->allActive() : \$this->model->all();
+        \$rows = \$this->model->all();
 
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="{$table}.csv"');

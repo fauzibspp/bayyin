@@ -3,7 +3,6 @@
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Core\Console;
-use App\Core\GeneratorHelper;
 use App\Core\RouteEditor;
 use App\Core\SchemaParser;
 
@@ -31,12 +30,31 @@ if (!is_dir($controllersDir)) {
 
 $controllerPath = $controllersDir . '/' . $controllerName . '.php';
 
-$hasDeletedAt = GeneratorHelper::hasDeletedAt($fields);
-$validationBlock = GeneratorHelper::buildValidationChecks($fields);
-$createDataBlock = GeneratorHelper::buildJsonAssignments($fields);
-$updateDataBlock = GeneratorHelper::buildJsonAssignments($fields);
-$searchableFieldsBlock = GeneratorHelper::buildSearchableFieldsBlock($fields);
-$exportFieldsBlock = GeneratorHelper::buildExportFieldsBlock($fields);
+$fieldAssignments = [];
+$updateAssignments = [];
+$validationChecks = [];
+$searchableFields = [];
+$hasDeletedAt = false;
+
+foreach ($fields as $field) {
+    $name = $field['name'];
+    $label = ucwords(str_replace('_', ' ', $name));
+
+    if ($name === 'deleted_at') {
+        $hasDeletedAt = true;
+        continue;
+    }
+
+    $validationChecks[] = "        if (!array_key_exists('{$name}', \$input) || \$input['{$name}'] === '') {\n            \$errors['{$name}'][] = '{$label} is required.';\n        }";
+    $fieldAssignments[] = "            '{$name}' => \$input['{$name}'],";
+    $updateAssignments[] = "            '{$name}' => \$input['{$name}'],";
+    $searchableFields[] = "'{$name}'";
+}
+
+$validationBlock = implode("\n", $validationChecks);
+$createDataBlock = implode("\n", $fieldAssignments);
+$updateDataBlock = implode("\n", $updateAssignments);
+$searchableFieldsBlock = implode(', ', $searchableFields);
 
 $deleteLogic = $hasDeletedAt
     ? "\$this->model->update((int) \$input['id'], ['deleted_at' => date('Y-m-d H:i:s')]);"
@@ -46,50 +64,6 @@ $bulkDeleteLogic = $hasDeletedAt
     ? "\$this->model->update((int) \$id, ['deleted_at' => date('Y-m-d H:i:s')]);"
     : "\$this->model->delete((int) \$id);";
 
-$trashMethods = $hasDeletedAt ? <<<PHP
-
-    public function trash(): void
-    {
-        JwtAuth::handle();
-
-        \$page = max(1, (int) (\$_GET['page'] ?? 1));
-        \$perPage = max(1, min(100, (int) (\$_GET['per_page'] ?? 10)));
-
-        \$items = \$this->model->trash(\$page, \$perPage);
-        \$total = \$this->model->countTrash();
-
-        \$this->success(
-            \$items,
-            '{$module} trash fetched successfully.',
-            200,
-            [
-                'page' => \$page,
-                'per_page' => \$perPage,
-                'total' => \$total,
-            ]
-        );
-    }
-
-    public function restore(): void
-    {
-        JwtAuth::role('admin');
-
-        \$input = JsonRequest::all();
-
-        if (empty(\$input['id'])) {
-            \$this->error('Validation failed.', 422, ['id' => ['Id is required.']]);
-        }
-
-        if (!\$this->model->restore((int) \$input['id'])) {
-            \$this->error('Failed to restore record.', 500);
-        }
-
-        AuditLogger::log('{$table}', 'restore', (int) \$input['id']);
-
-        \$this->success(null, '{$module} restored successfully.');
-    }
-PHP : '';
-
 if (!file_exists($controllerPath)) {
     $template = <<<PHP
 <?php
@@ -97,7 +71,6 @@ if (!file_exists($controllerPath)) {
 namespace App\Controllers\Api;
 
 use App\Controllers\ApiController;
-use App\Core\AuditLogger;
 use App\Core\JsonRequest;
 use App\Middleware\JwtAuth;
 use App\Models\\{$modelName};
@@ -202,37 +175,6 @@ class {$controllerName} extends ApiController
 
         \$this->success(\$item, '{$module} fetched successfully.');
     }
-{$trashMethods}
-
-    public function exportCsv(): void
-    {
-        JwtAuth::handle();
-
-        \$rows = method_exists(\$this->model, 'allActive') ? \$this->model->allActive() : \$this->model->all();
-
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="{$table}.csv"');
-
-        \$out = fopen('php://output', 'w');
-
-        if (!\$out) {
-            exit;
-        }
-
-        \$headers = [{$exportFieldsBlock}];
-        fputcsv(\$out, \$headers);
-
-        foreach (\$rows as \$row) {
-            \$line = [];
-            foreach (\$headers as \$header) {
-                \$line[] = \$row[\$header] ?? '';
-            }
-            fputcsv(\$out, \$line);
-        }
-
-        fclose(\$out);
-        exit;
-    }
 
     public function store(): void
     {
@@ -249,8 +191,6 @@ class {$controllerName} extends ApiController
 {$createDataBlock}
             'created_at' => date('Y-m-d H:i:s'),
         ]);
-
-        AuditLogger::log('{$table}', 'create', (int) \$id, \$input);
 
         \$this->success(['id' => \$id], '{$module} created successfully.');
     }
@@ -271,8 +211,6 @@ class {$controllerName} extends ApiController
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
-        AuditLogger::log('{$table}', 'update', (int) \$input['id'], \$input);
-
         \$this->success(null, '{$module} updated successfully.');
     }
 
@@ -287,8 +225,6 @@ class {$controllerName} extends ApiController
         }
 
         {$deleteLogic}
-
-        AuditLogger::log('{$table}', 'delete', (int) \$input['id']);
 
         \$this->success(null, '{$module} deleted successfully.');
     }
@@ -306,7 +242,6 @@ class {$controllerName} extends ApiController
 
         foreach (\$ids as \$id) {
             {$bulkDeleteLogic}
-            AuditLogger::log('{$table}', 'bulk_delete_item', (int) \$id);
         }
 
         \$this->success(null, '{$module} bulk deleted successfully.');
@@ -320,13 +255,6 @@ PHP;
 RouteEditor::addApiRoute('GET', "/api/{$table}", $controllerName, 'index');
 RouteEditor::addApiRoute('GET', "/api/{$table}/datatable", $controllerName, 'datatable');
 RouteEditor::addApiRoute('GET', "/api/{$table}/show", $controllerName, 'show');
-RouteEditor::addApiRoute('GET', "/api/{$table}/export", $controllerName, 'exportCsv');
-
-if ($hasDeletedAt) {
-    RouteEditor::addApiRoute('GET', "/api/{$table}/trash", $controllerName, 'trash');
-    RouteEditor::addApiRoute('POST', "/api/{$table}/restore", $controllerName, 'restore');
-}
-
 RouteEditor::addApiRoute('POST', "/api/{$table}/store", $controllerName, 'store');
 RouteEditor::addApiRoute('POST', "/api/{$table}/update", $controllerName, 'update');
 RouteEditor::addApiRoute('POST', "/api/{$table}/delete", $controllerName, 'delete');
@@ -339,14 +267,9 @@ Console::line("- API Routes:");
 Console::line("  GET  /api/{$table}");
 Console::line("  GET  /api/{$table}/datatable");
 Console::line("  GET  /api/{$table}/show?id=1");
-Console::line("  GET  /api/{$table}/export");
-if ($hasDeletedAt) {
-    Console::line("  GET  /api/{$table}/trash");
-    Console::line("  POST /api/{$table}/restore");
-}
 Console::line("  POST /api/{$table}/store");
 Console::line("  POST /api/{$table}/update");
 Console::line("  POST /api/{$table}/delete");
 Console::line("  POST /api/{$table}/bulk-delete");
-Console::line("- Features: JWT protected API, export CSV, audit log integration, trash/restore" . ($hasDeletedAt ? ', soft delete ready' : ''));
+Console::line("- Features: JWT protected API, show, datatable, pagination, search/filter, bulk delete, ajax-friendly validation" . ($hasDeletedAt ? ', soft delete ready' : ''));
 Console::line("- Fields: " . implode(', ', array_map(fn($f) => $f['name'] . ':' . $f['type'], $fields)));

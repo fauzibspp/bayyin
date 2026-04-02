@@ -3,7 +3,6 @@
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Core\Console;
-use App\Core\GeneratorHelper;
 use App\Core\RouteEditor;
 use App\Core\SchemaParser;
 
@@ -45,18 +44,28 @@ $modelPath = $modelsDir . '/' . $modelName . '.php';
 $requestPath = $requestsDir . '/' . $requestName . '.php';
 $seederPath = $seedersDir . '/' . $seederName . '.php';
 
-$hasDeletedAt = GeneratorHelper::hasDeletedAt($fields);
-$fillableBlock = GeneratorHelper::buildFillableBlock($fields);
-$rulesBlock = GeneratorHelper::buildRulesBlock($fields);
-$messagesBlock = GeneratorHelper::buildMessagesBlock($fields);
+$fillableLines = [];
+$hasDeletedAt = false;
 
-$columnHeaders = GeneratorHelper::buildColumnHeaders($fields);
-$columnsJs = GeneratorHelper::buildColumnsJs($fields);
-$showFields = GeneratorHelper::buildShowFields($fields);
-$modalCreateFields = GeneratorHelper::buildModalCreateFields($fields);
-$modalEditFields = GeneratorHelper::buildModalEditFields($fields);
-$editHydrationJs = GeneratorHelper::buildEditModalJsHydration($fields);
-$editSerializeJs = GeneratorHelper::buildEditModalJsSerialize($fields);
+foreach ($fields as $field) {
+    if ($field['name'] === 'deleted_at') {
+        $hasDeletedAt = true;
+    }
+    $fillableLines[] = "        '{$field['name']}',";
+}
+$fillableLines[] = "        'created_at',";
+$fillableLines[] = "        'updated_at',";
+$fillableBlock = implode("\n", $fillableLines);
+
+$ruleLines = [];
+foreach ($fields as $field) {
+    if ($field['name'] === 'deleted_at') {
+        continue;
+    }
+    $rule = SchemaParser::validationRule($field['type']);
+    $ruleLines[] = "            '{$field['name']}' => '{$rule}',";
+}
+$rulesBlock = implode("\n", $ruleLines);
 
 $trashMethods = $hasDeletedAt ? <<<PHP
 
@@ -189,7 +198,12 @@ class {$controllerName} extends CrudController
             \$data = [
 PHP;
 
-    $controllerTemplate .= GeneratorHelper::buildPostAssignments($fields);
+    foreach ($fields as $field) {
+        if ($field['name'] === 'deleted_at') {
+            continue;
+        }
+        $controllerTemplate .= "\n                '{$field['name']}' => \$_POST['{$field['name']}'] ?? null,";
+    }
 
     $controllerTemplate .= <<<PHP
 
@@ -233,7 +247,12 @@ PHP;
             \$updateData = [
 PHP;
 
-    $controllerTemplate .= GeneratorHelper::buildPostAssignments($fields);
+    foreach ($fields as $field) {
+        if ($field['name'] === 'deleted_at') {
+            continue;
+        }
+        $controllerTemplate .= "\n                '{$field['name']}' => \$_POST['{$field['name']}'] ?? null,";
+    }
 
     $controllerTemplate .= <<<PHP
 
@@ -307,7 +326,17 @@ class {$requestName}
     public static function messages(): array
     {
         return [
-{$messagesBlock}
+PHP;
+
+    foreach ($fields as $field) {
+        if ($field['name'] === 'deleted_at') {
+            continue;
+        }
+        $requestTemplate .= "\n            '{$field['name']}.required' => '" . ucwords(str_replace('_', ' ', $field['name'])) . " is required.',";
+    }
+
+    $requestTemplate .= <<<PHP
+
         ];
     }
 }
@@ -334,6 +363,96 @@ class {$seederName}
 }
 PHP;
     file_put_contents($seederPath, $seederTemplate);
+}
+
+$columnHeaders = '';
+$columnsJs = '';
+
+foreach ($fields as $field) {
+    if ($field['name'] === 'deleted_at') {
+        continue;
+    }
+    $label = ucwords(str_replace('_', ' ', $field['name']));
+    $columnHeaders .= "\n                    <th>{$label}</th>";
+    $columnsJs .= "\n                { data: '{$field['name']}' },";
+}
+
+$createFields = '';
+$editFields = '';
+$showFields = '';
+
+foreach ($fields as $field) {
+    $name = $field['name'];
+
+    if ($name === 'deleted_at') {
+        continue;
+    }
+
+    $label = ucwords(str_replace('_', ' ', $name));
+    $type = $field['type'];
+
+    $showFields .= <<<PHP
+
+        <tr>
+            <th width="220">{$label}</th>
+            <td><?= htmlspecialchars((string) (\$data['{$name}'] ?? '')) ?></td>
+        </tr>
+PHP;
+
+    if (SchemaParser::isTextarea($type)) {
+        $createFields .= <<<PHP
+
+            <div class="form-group">
+                <label for="{$name}">{$label}</label>
+                <textarea name="{$name}" id="{$name}" class="form-control" rows="4" required><?= htmlspecialchars((string) (\$old['{$name}'] ?? '')) ?></textarea>
+            </div>
+PHP;
+
+        $editFields .= <<<PHP
+
+            <div class="form-group">
+                <label for="{$name}">{$label}</label>
+                <textarea name="{$name}" id="{$name}" class="form-control" rows="4" required><?= htmlspecialchars((string) (\$data['{$name}'] ?? '')) ?></textarea>
+            </div>
+PHP;
+    } elseif (SchemaParser::isCheckbox($type)) {
+        $createFields .= <<<PHP
+
+            <div class="form-group form-check">
+                <input type="hidden" name="{$name}" value="0">
+                <input type="checkbox" name="{$name}" id="{$name}" value="1" class="form-check-input" <?= !empty(\$old['{$name}']) ? 'checked' : '' ?>>
+                <label class="form-check-label" for="{$name}">{$label}</label>
+            </div>
+PHP;
+
+        $editFields .= <<<PHP
+
+            <div class="form-group form-check">
+                <input type="hidden" name="{$name}" value="0">
+                <input type="checkbox" name="{$name}" id="{$name}" value="1" class="form-check-input" <?= !empty(\$data['{$name}']) ? 'checked' : '' ?>>
+                <label class="form-check-label" for="{$name}">{$label}</label>
+            </div>
+PHP;
+    } else {
+        $inputType = SchemaParser::inputType($type);
+        $step = $type === 'decimal' ? ' step="0.01"' : '';
+
+        $createFields .= <<<PHP
+
+            <div class="form-group">
+                <label for="{$name}">{$label}</label>
+                <input type="{$inputType}" name="{$name}" id="{$name}" value="<?= htmlspecialchars((string) (\$old['{$name}'] ?? '')) ?>" class="form-control"{$step} required>
+            </div>
+PHP;
+
+        $editFields .= <<<PHP
+
+            <div class="form-group">
+                <label for="{$name}">{$label}</label>
+                <input type="{$inputType}" name="{$name}" id="{$name}" value="<?= htmlspecialchars((string) (\$data['{$name}'] ?? '')) ?>" class="form-control"{$step} required>
+            </div>
+PHP;
+    }
 }
 
 $trashView = $hasDeletedAt ? <<<PHP
@@ -435,8 +554,7 @@ $indexView = <<<PHP
             <thead>
                 <tr>
                     <th width="40"><input type="checkbox" id="check-all-{$viewFolder}"></th>
-                    <th width="80">ID</th>
-{$columnHeaders}
+                    <th width="80">ID</th>{$columnHeaders}
                     <th width="260">Actions</th>
                 </tr>
             </thead>
@@ -454,7 +572,81 @@ $indexView = <<<PHP
                 </div>
                 <div class="modal-body">
                     <div id="create-errors-{$viewFolder}" class="alert alert-danger d-none"></div>
-{$modalCreateFields}
+PHP;
+
+$modalCreateFields = '';
+$modalEditFields = '';
+
+foreach ($fields as $field) {
+    $name = $field['name'];
+
+    if ($name === 'deleted_at') {
+        continue;
+    }
+
+    $label = ucwords(str_replace('_', ' ', $name));
+    $type = $field['type'];
+
+    if (SchemaParser::isTextarea($type)) {
+        $modalCreateFields .= <<<PHP
+
+                    <div class="form-group">
+                        <label for="create_{$name}">{$label}</label>
+                        <textarea name="{$name}" id="create_{$name}" class="form-control" rows="4" required></textarea>
+                    </div>
+PHP;
+
+        $modalEditFields .= <<<PHP
+
+                    <div class="form-group">
+                        <label for="edit_{$name}">{$label}</label>
+                        <textarea name="{$name}" id="edit_{$name}" class="form-control" rows="4" required></textarea>
+                    </div>
+PHP;
+    } elseif (SchemaParser::isCheckbox($type)) {
+        $modalCreateFields .= <<<PHP
+
+                    <div class="form-group form-check">
+                        <input type="hidden" name="{$name}" value="0">
+                        <input type="checkbox" name="{$name}" id="create_{$name}" value="1" class="form-check-input">
+                        <label class="form-check-label" for="create_{$name}">{$label}</label>
+                    </div>
+PHP;
+
+        $modalEditFields .= <<<PHP
+
+                    <div class="form-group form-check">
+                        <input type="hidden" name="{$name}" value="0">
+                        <input type="checkbox" name="{$name}" id="edit_{$name}" value="1" class="form-check-input">
+                        <label class="form-check-label" for="edit_{$name}">{$label}</label>
+                    </div>
+PHP;
+    } else {
+        $inputType = SchemaParser::inputType($type);
+        $step = $type === 'decimal' ? ' step="0.01"' : '';
+
+        $modalCreateFields .= <<<PHP
+
+                    <div class="form-group">
+                        <label for="create_{$name}">{$label}</label>
+                        <input type="{$inputType}" name="{$name}" id="create_{$name}" class="form-control"{$step} required>
+                    </div>
+PHP;
+
+        $modalEditFields .= <<<PHP
+
+                    <div class="form-group">
+                        <label for="edit_{$name}">{$label}</label>
+                        <input type="{$inputType}" name="{$name}" id="edit_{$name}" class="form-control"{$step} required>
+                    </div>
+PHP;
+    }
+}
+
+$indexView .= $modalCreateFields;
+
+$indexView .= <<<PHP
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Save</button>
@@ -476,7 +668,12 @@ $indexView = <<<PHP
                 </div>
                 <div class="modal-body">
                     <div id="edit-errors-{$viewFolder}" class="alert alert-danger d-none"></div>
-{$modalEditFields}
+PHP;
+
+$indexView .= $modalEditFields;
+
+$indexView .= <<<PHP
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Update</button>
@@ -502,8 +699,7 @@ $(function () {
                     return '<input type="checkbox" class="row-check" value="' + row.id + '">';
                 }
             },
-            { data: 'id' },
-{$columnsJs}
+            { data: 'id' },{$columnsJs}
             {
                 data: null,
                 orderable: false,
@@ -511,7 +707,7 @@ $(function () {
                 render: function (data, type, row) {
                     return ''
                         + '<a href="/{$viewFolder}/show?id=' + row.id + '" class="btn btn-info btn-sm mr-1">View</a>'
-                        + '<button type="button" class="btn btn-warning btn-sm mr-1 btn-edit" data-row=\\'' + JSON.stringify(row) + '\\'>Edit</button>'
+                        + '<button type="button" class="btn btn-warning btn-sm mr-1 btn-edit" data-row=\'' + JSON.stringify(row) + '\'>Edit</button>'
                         + '<button type="button" class="btn btn-danger btn-sm btn-delete" data-id="' + row.id + '">Delete</button>';
                 }
             }
@@ -564,7 +760,22 @@ $(function () {
         const row = $(this).data('row');
         clearErrors('#edit-errors-{$viewFolder}');
         $('#edit_id_{$viewFolder}').val(row.id);
-{$editHydrationJs}
+PHP;
+
+foreach ($fields as $field) {
+    $name = $field['name'];
+    if ($name === 'deleted_at') {
+        continue;
+    }
+    if (SchemaParser::isCheckbox($field['type'])) {
+        $indexView .= "\n        $('#edit_{$name}').prop('checked', !!parseInt(row.{$name} || 0, 10));";
+    } else {
+        $indexView .= "\n        $('#edit_{$name}').val(row.{$name} || '');";
+    }
+}
+
+$indexView .= <<<PHP
+
         $('#modal-edit-{$viewFolder}').modal('show');
     });
 
@@ -576,7 +787,20 @@ $(function () {
         $(this).serializeArray().forEach(function (item) {
             data[item.name] = item.value;
         });
-{$editSerializeJs}
+PHP;
+
+foreach ($fields as $field) {
+    $name = $field['name'];
+    if ($name === 'deleted_at') {
+        continue;
+    }
+    if (SchemaParser::isCheckbox($field['type'])) {
+        $indexView .= "\n        data['{$name}'] = $('#edit_{$name}').is(':checked') ? 1 : 0;";
+    }
+}
+
+$indexView .= <<<PHP
+
         $.ajax({
             url: '/api/{$viewFolder}/update',
             type: 'POST',
@@ -651,6 +875,22 @@ $(function () {
 });
 </script>
 PHP;
+
+$showFields = '';
+foreach ($fields as $field) {
+    $name = $field['name'];
+    if ($name === 'deleted_at') {
+        continue;
+    }
+    $label = ucwords(str_replace('_', ' ', $name));
+    $showFields .= <<<PHP
+
+        <tr>
+            <th width="220">{$label}</th>
+            <td><?= htmlspecialchars((string) (\$data['{$name}'] ?? '')) ?></td>
+        </tr>
+PHP;
+}
 
 $showView = <<<PHP
 <?php
