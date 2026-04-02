@@ -1,8 +1,8 @@
 {
-  "name": "bayyin/framework",
+  "name": "fauzibspp/bayyin",
   "description": "Bayyin is a lightweight PHP native MVC framework with CLI scaffolding, migrations, seeders, AJAX CRUD, and API module generation.",
   "type": "project",
-  "license": "proprietary",
+  "license": "MIT",
   "keywords": [
     "bayyin",
     "php",
@@ -13,6 +13,10 @@
     "adminlte",
     "api"
   ],
+  "homepage": "https://github.com/fauzibspp/bayyin",
+  "support": {
+    "source": "https://github.com/fauzibspp/bayyin"
+  },
   "require": {
     "php": ">=8.1",
     "firebase/php-jwt": "^7.0"

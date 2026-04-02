@@ -1,37 +1,47 @@
-# Bayyin
+# Bayyin v3.0.0
 
-Bayyin is a lightweight PHP native MVC framework with:
-- MVC core
-- CLI scaffolding
+Bayyin is a lightweight PHP native MVC framework designed for rapid admin system and API development.
+
+## Features
+
+- PHP native MVC structure
+- CLI scaffolding suite
 - migrations and seeders
-- web CRUD generation
-- API CRUD generation
+- schema-driven web CRUD generation
+- schema-driven API CRUD generation
 - JWT authentication for API
 - DataTables-ready admin modules
-- soft delete, trash/restore, export CSV, and audit logging support
+- modal and AJAX CRUD flow
+- soft delete, trash, and restore
+- CSV export support
+- audit logging integration
 
 ## Requirements
-- PHP 8.1+
+
+- PHP 8.1 or newer
 - Composer
-- MySQL/MariaDB
+- MySQL or MariaDB
 
 ## Installation
+
 See `docs/installation.md`
 
 ## Quick Start
+
 See `docs/quick-start.md`
 
-## CLI
-See `docs/cli-commands.md`
+## Documentation
 
-## JWT API Auth
-See `docs/jwt-api-auth.md`
+- `docs/installation.md`
+- `docs/quick-start.md`
+- `docs/cli-commands.md`
+- `docs/jwt-api-auth.md`
+- `docs/module-generation.md`
 
-## Module Generation
-See `docs/module-generation.md`
+## Version
 
-## Versioning
-See `VERSION.md`
+Current stable public release: **v3.0.0**
 
-## Changelog
-See `CHANGELOG.md`
+## Repository
+
+Source: `https://github.com/fauzibspp/bayyin`
