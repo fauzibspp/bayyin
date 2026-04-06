@@ -19,7 +19,7 @@ $error = $error ?? null;
 <div class="login-box">
     <div class="card card-outline card-primary">
         <div class="card-header text-center">
-            <a href="/login" class="h1"><b>Prisma</b>Risk</a>
+            <a href="/login" class="h1"><b><?= App\Core\Version::getName() ?></b><?= App\Core\Version::getVersion() ?></a>
         </div>
 
         <div class="card-body">
